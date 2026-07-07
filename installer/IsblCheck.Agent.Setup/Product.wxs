@@ -6,7 +6,7 @@
   <!-- Имя продукта. -->
   <?define ProductName = "IsblCheck Agent" ?>
 
-  <Product Id="*" Name="$(var.ProductName)" Language="1033" Version="2.6.0.0" Manufacturer="NPO Computer" UpgradeCode="5d5977b3-85d7-492e-a27c-0366afa42c29">
+  <Product Id="*" Name="$(var.ProductName)" Language="1033" Version="2.7.0.0" Manufacturer="NPO Computer" UpgradeCode="5d5977b3-85d7-492e-a27c-0366afa42c29">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />

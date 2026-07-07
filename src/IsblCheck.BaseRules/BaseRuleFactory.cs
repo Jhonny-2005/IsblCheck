@@ -1,6 +1,5 @@
 using System.ComponentModel.Composition;
 using IsblCheck.BaseRules.Functions;
-using IsblCheck.BaseRules.LogicalExpressions;
 using IsblCheck.BaseRules.ObjectModel;
 using IsblCheck.BaseRules.Other;
 using IsblCheck.BaseRules.Security;

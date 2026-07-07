@@ -33,7 +33,7 @@ namespace IsblCheck.BaseRules.Functions
 
       public override void EnterOperand(IsblParser.OperandContext context)
       {
-        if (context.@string() != null || context.identifier() != null || context.function() != null)
+        if (context.@string() != null || context.variable() != null || context.function() != null)
           return;
 
         var text = context.GetText().Trim();
