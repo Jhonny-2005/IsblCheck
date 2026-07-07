@@ -63,7 +63,6 @@
     <Compile Include="Functions\NestedTransactionRuleTest.cs" />
     <Compile Include="Functions\ExceptionsOffBalanceRuleTest.cs" />
     <Compile Include="Functions\MagicNumberRuleTest.cs" />
-    <Compile Include="Functions\StringComparisonMisuseRuleTest.cs" />
     <Compile Include="Functions\SilentExceptionSwallowRuleTest.cs" />
     <Compile Include="Functions\BranchedExceptionsOffRuleTest.cs" />
     <Compile Include="Functions\InteractiveWindowOnWorkflowRuleTest.cs" />
@@ -89,7 +88,6 @@
     <Compile Include="Functions\UsingNotExistedReferenceRuleTest.cs" />
     <Compile Include="Security\SQLInjectionDirectConcatRuleTest.cs" />
     <Compile Include="Security\HardcodedCredentialRuleTest.cs" />
-    <Compile Include="Security\UnsafeSQLConcatRuleTest.cs" />
     <Compile Include="Security\ShellExecRuleTest.cs" />
     <Compile Include="Security\RegWriteRuleTest.cs" />
     <Compile Include="Security\ExecuteInServerEventsRuleTest.cs" />

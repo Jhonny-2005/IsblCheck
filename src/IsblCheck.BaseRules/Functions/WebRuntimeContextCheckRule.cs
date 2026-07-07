@@ -37,24 +37,34 @@ namespace IsblCheck.BaseRules.Functions
     private class DesktopFunctionListener : IsblBaseListener
     {
       public List<IsblParser.FunctionContext> UnsafeCalls { get; } = new List<IsblParser.FunctionContext>();
-      private bool hasRuntimeCheck = false;
 
       public override void EnterFunction(IsblParser.FunctionContext context)
       {
         var name = context.identifier().GetText();
-        if (RuntimeCheckFunctions.Contains(name))
-        {
-          hasRuntimeCheck = true;
-        }
-        else if (DesktopOnlyFunctions.Contains(name) && !hasRuntimeCheck)
+        if (DesktopOnlyFunctions.Contains(name) && !IsInsideRuntimeCheck(context))
         {
           UnsafeCalls.Add(context);
         }
       }
 
-      public override void ExitIfStatement(IsblParser.IfStatementContext context)
+      private bool IsInsideRuntimeCheck(ParserRuleContext context)
       {
-        hasRuntimeCheck = false;
+        var parent = context.Parent;
+        while (parent != null)
+        {
+          if (parent is IsblParser.IfStatementContext ifStmt)
+          {
+            var blockText = ifStmt.GetText().ToUpperInvariant();
+            foreach (var check in RuntimeCheckFunctions)
+            {
+              if (blockText.Contains(check.ToUpperInvariant()))
+                return true;
+            }
+            return false;
+          }
+          parent = parent.Parent;
+        }
+        return false;
       }
     }
 

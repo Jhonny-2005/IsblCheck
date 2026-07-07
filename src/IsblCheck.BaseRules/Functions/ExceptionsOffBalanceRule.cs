@@ -65,7 +65,7 @@ namespace IsblCheck.BaseRules.Functions
 
       foreach (var call in listener.UnbalancedOffCalls)
       {
-        report.AddError(Code, "Несбалансированный вызов ExceptionsOff:_exceptions подавлены без восстановления.", document, call.identifier().GetTextPosition());
+        report.AddError(Code, "Несбалансированный вызов ExceptionsOff: исключения подавлены без восстановления.", document, call.identifier().GetTextPosition());
       }
 
       if (listener.FinalBalance > 0)

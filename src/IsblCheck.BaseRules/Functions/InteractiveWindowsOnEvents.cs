@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime.Tree;
@@ -146,7 +146,7 @@ namespace IsblCheck.BaseRules.Functions
       walker.Walk(listener, tree);
 
       var referenceType = context.Development.ReferenceTypes
-        .FirstOrDefault(r => r.Name == document.ComponentName);
+        .FirstOrDefault(r => string.Equals(r.Name, document.ComponentName, StringComparison.OrdinalIgnoreCase));
       Severity severity;
       string description;
       if (referenceType?.NumerationMethod == NumerationMethod.StronglyAuto)

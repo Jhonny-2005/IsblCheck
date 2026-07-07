@@ -35,29 +35,34 @@ namespace IsblCheck.BaseRules.Functions
     private class FormAccessListener : IsblBaseListener
     {
       public List<IsblParser.InvocationCallContext> UnsafeFormAccess { get; } = new List<IsblParser.InvocationCallContext>();
-      private bool hasInteractiveCheck = false;
-
-      public override void EnterFunction(IsblParser.FunctionContext context)
-      {
-        var name = context.identifier().GetText();
-        if (InteractiveCheckFunctions.Contains(name))
-        {
-          hasInteractiveCheck = true;
-        }
-      }
 
       public override void EnterInvocationCall(IsblParser.InvocationCallContext context)
       {
         var name = context.identifier().GetText();
-        if (FormProperties.Contains(name) && !hasInteractiveCheck)
+        if (FormProperties.Contains(name) && !IsInsideInteractiveCheck(context))
         {
           UnsafeFormAccess.Add(context);
         }
       }
 
-      public override void ExitIfStatement(IsblParser.IfStatementContext context)
+      private bool IsInsideInteractiveCheck(ParserRuleContext context)
       {
-        hasInteractiveCheck = false;
+        var parent = context.Parent;
+        while (parent != null)
+        {
+          if (parent is IsblParser.IfStatementContext ifStmt)
+          {
+            var blockText = ifStmt.GetText().ToUpperInvariant();
+            foreach (var check in InteractiveCheckFunctions)
+            {
+              if (blockText.Contains(check.ToUpperInvariant()))
+                return true;
+            }
+            return false;
+          }
+          parent = parent.Parent;
+        }
+        return false;
       }
     }
 

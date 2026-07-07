@@ -61,6 +61,14 @@ namespace IsblCheck.BaseRules.Functions
         hasTransactionEnd = false;
         startContext = null;
       }
+
+      public void CheckFinalBalance()
+      {
+        if (hasTransactionStart && !hasTransactionEnd && startContext != null)
+        {
+          UnbalancedTransactions.Add(startContext);
+        }
+      }
     }
 
     public override void Apply(IReport report, IDocument document, IContext context)
@@ -69,6 +77,7 @@ namespace IsblCheck.BaseRules.Functions
       var walker = new ParseTreeWalker();
       var listener = new TransactionListener();
       walker.Walk(listener, tree);
+      listener.CheckFinalBalance();
 
       foreach (var call in listener.UnbalancedTransactions)
       {

@@ -43,7 +43,7 @@ namespace IsblCheck.BaseRules.Functions
         if (context.ChildCount < 5)
           return;
 
-        var exceptBlock = context.GetChild(2) as IsblParser.StatementBlockContext;
+        var exceptBlock = context.GetChild(3) as IsblParser.StatementBlockContext;
         if (exceptBlock == null)
           return;
 

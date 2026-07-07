@@ -68,7 +68,6 @@
     <Compile Include="Functions\NestedTransactionRule.cs" />
     <Compile Include="Functions\ExceptionsOffBalanceRule.cs" />
     <Compile Include="Functions\MagicNumberRule.cs" />
-    <Compile Include="Functions\StringComparisonMisuseRule.cs" />
     <Compile Include="Functions\SilentExceptionSwallowRule.cs" />
     <Compile Include="Functions\BranchedExceptionsOffRule.cs" />
     <Compile Include="Functions\InteractiveWindowOnWorkflowRule.cs" />
@@ -112,7 +111,6 @@
     </Compile>
     <Compile Include="Variables\NotUsedVarRule.cs" />
     <Compile Include="ObjectModel\RecoveryObjectStateRule.cs" />
-    <Compile Include="Security\UnsafeSQLConcatRule.cs" />
     <Compile Include="Security\HardcodedCredentialRule.cs" />
     <Compile Include="Security\SQLInjectionDirectConcatRule.cs" />
     <Compile Include="Security\ShellExecRule.cs" />

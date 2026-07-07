@@ -42,7 +42,6 @@ namespace IsblCheck.BaseRules
       this.Register<NestedTransactionRule>(NestedTransactionRule.Info);
       this.Register<ExceptionsOffBalanceRule>(ExceptionsOffBalanceRule.Info);
       this.Register<MagicNumberRule>(MagicNumberRule.Info);
-      this.Register<StringComparisonMisuseRule>(StringComparisonMisuseRule.Info);
       this.Register<SilentExceptionSwallowRule>(SilentExceptionSwallowRule.Info);
       this.Register<BranchedExceptionsOffRule>(BranchedExceptionsOffRule.Info);
       this.Register<InteractiveWindowOnWorkflowRule>(InteractiveWindowOnWorkflowRule.Info);
@@ -92,7 +91,6 @@ namespace IsblCheck.BaseRules
 
       #region Security
 
-      this.Register<UnsafeSQLConcatRule>(UnsafeSQLConcatRule.Info);
       this.Register<HardcodedCredentialRule>(HardcodedCredentialRule.Info);
       this.Register<SQLInjectionDirectConcatRule>(SQLInjectionDirectConcatRule.Info);
       this.Register<ShellExecRule>(ShellExecRule.Info);

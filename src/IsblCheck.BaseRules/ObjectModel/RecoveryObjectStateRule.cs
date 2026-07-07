@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
@@ -55,7 +55,7 @@ namespace IsblCheck.BaseRules.ObjectModel
       public ParserRuleContext StatementContext { get; set; }
     }
 
-    /// <summary>asdfasdfasdf
+    /// <summary>
     /// Поиск объектов с незавершенным состоянием, открываемые метод с параметром.
     /// </summary>
     private class CallMethodsWithSaveStateListener : IsblBaseListener

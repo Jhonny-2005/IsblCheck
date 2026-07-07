@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using IsblCheck.BaseRules.Properties;
@@ -29,7 +29,7 @@ namespace IsblCheck.BaseRules.Other
     /// <summary>
     /// Регулярное выражение для однострочных комментариев.
     /// </summary>
-    private static readonly Regex oneLineCommentRegex = new Regex(@"(?://|--)(.*)",
+    private static readonly Regex oneLineCommentRegex = new Regex(@"(//)(.*)",
       RegexOptions.Multiline | RegexOptions.Compiled);
     
     /// <summary>
