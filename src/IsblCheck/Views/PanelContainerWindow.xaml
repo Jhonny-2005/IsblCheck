@@ -210,7 +210,7 @@
         </StatusBarItem>
         <Separator Background="#005A9E"/>
         <StatusBarItem Style="{StaticResource ModernStatusBarItem}">
-          <TextBlock Text="ISBL Check 2.0 | Directum 5.8" FontSize="11"/>
+          <TextBlock Text="ISBL Check 2.8.0 | Directum 5.8" FontSize="11"/>
         </StatusBarItem>
       </StatusBar>
     </Grid>

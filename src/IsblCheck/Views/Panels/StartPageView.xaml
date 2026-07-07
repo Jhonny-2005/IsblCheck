@@ -92,9 +92,9 @@
       <!-- Version Info -->
       <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="16">
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Версия 2.0 | Directum 5.8" FontSize="12" Foreground="#A0A0A0"/>
+          <TextBlock Text="Версия 2.8.0 | Directum 5.8" FontSize="12" Foreground="#A0A0A0"/>
           <TextBlock Text=" | " FontSize="12" Foreground="#D0D0D0"/>
-          <TextBlock Text="29 правил анализа" FontSize="12" Foreground="#A0A0A0"/>
+          <TextBlock Text="53 правила анализа" FontSize="12" Foreground="#A0A0A0"/>
         </StackPanel>
       </Border>
 

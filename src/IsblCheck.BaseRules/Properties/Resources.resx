@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -191,12 +191,6 @@
   </data>
   <data name="FunctionTooBigRuleDescription" xml:space="preserve">
     <value>Правило ограничения максимальной длины функции.</value>
-  </data>
-  <data name="UsingTrueFalseKeywords" xml:space="preserve">
-    <value>Использование констант True и False в качестве аргументов логического выражения.</value>
-  </data>
-  <data name="UsingTrueFalseKeywordsRuleDescription" xml:space="preserve">
-    <value>Правило о том, что нельзя использовать константы True и False в логическом выражении.</value>
   </data>
   <data name="SelfAssignmentVarRuleDescription" xml:space="preserve">
     <value>Выражение "{0}" присваивается самому себе. Возможно опечатка.</value>
