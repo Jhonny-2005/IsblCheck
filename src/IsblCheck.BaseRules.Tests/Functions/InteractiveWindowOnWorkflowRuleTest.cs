@@ -14,7 +14,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void MessageBoxInEvent_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "MessageBox",
+        "MessageBox(\"Hello\")",
         path: "Events.AfterUpdate");
       TestHelper.AssertSingleMessage(report, "F038", Severity.Warning);
     }
@@ -23,7 +23,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void NonEventPath_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "MessageBox",
+        "MessageBox(\"Hello\")",
         path: "SomeOtherPath");
       TestHelper.AssertNoMessages(report);
     }

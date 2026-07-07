@@ -15,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.Other
     public void ConditionalExit_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "foreach x in arr do\nif x > 10 then\nexitfor\nend\nend");
+        "foreach x in arr do\nif x > 10 then\nexitfor\nendif\nendforeach");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -23,15 +23,14 @@ namespace IsblCheck.BaseRules.Tests.Other
     public void UnconditionalExit_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "foreach x in arr do\nexitfor\nend");
+        "foreach x in arr do\nexitfor\nendforeach");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected unconditional exit for warning");
     }
 
     [TestMethod]
     public void NoForeach_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule,
-        "x = 1\ny = 2");
+      var report = TestHelper.ApplyRule(rule, "x = 1\ny = 2");
       TestHelper.AssertNoMessages(report);
     }
   }

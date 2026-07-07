@@ -14,7 +14,7 @@ namespace IsblCheck.BaseRules.Tests.Security
     public void RegWriteInEvent_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "RegWriteValue",
+        "RegWriteValue(\"key\"; \"value\")",
         path: "Events.AfterUpdate");
       TestHelper.AssertSingleMessage(report, "S005", Severity.Error);
     }
@@ -23,7 +23,7 @@ namespace IsblCheck.BaseRules.Tests.Security
     public void RegWriteOutsideEvent_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "RegWriteValue",
+        "RegWriteValue(\"key\"; \"value\")",
         path: "SomeOtherPath");
       TestHelper.AssertNoMessages(report);
     }

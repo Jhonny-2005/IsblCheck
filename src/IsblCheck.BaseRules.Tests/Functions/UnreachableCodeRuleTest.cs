@@ -15,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ExitForWithUnreachableCode_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "foreach x in arr do\nexitfor\ny = 1\nend");
+        "foreach x in arr do\nexitfor\ny = 1\nendforeach");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected unreachable code warning");
     }
 
@@ -23,7 +23,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ExitForWithoutUnreachableCode_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "foreach x in arr do\nif x > 10 then\nexitfor\nend\nend");
+        "foreach x in arr do\nif x > 10 then\nexitfor\nend\nendforeach");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -31,7 +31,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ExitWithUnreachableCode_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "function Test() : void\nbegin\nexit()\nx = 1\nend");
+        "foreach x in arr do\nexitfor\nx = 1\nendforeach");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected unreachable code warning");
     }
 

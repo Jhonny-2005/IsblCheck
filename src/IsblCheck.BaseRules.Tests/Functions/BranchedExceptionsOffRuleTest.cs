@@ -14,7 +14,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void AsymmetricOffOn_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x = 1 then\nExceptionsOff\nabs(x)\nelse\nExceptionsOn\nabs(y)\nend");
+        "if x = 1 then\nExceptionsOff()\nabs(x)\nelse\nExceptionsOn()\nabs(y)\nendif");
       TestHelper.AssertSingleMessage(report, "F037", Severity.Warning);
     }
 
@@ -22,7 +22,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void SymmetricOffOn_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x = 1 then\nExceptionsOff\nabs(x)\nelse\nExceptionsOff\nabs(y)\nend");
+        "if x = 1 then\nExceptionsOff()\nabs(x)\nelse\nExceptionsOff()\nabs(y)\nendif");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -30,7 +30,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void NoExceptionsInEither_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x = 1 then\nabs(x)\nelse\nabs(y)\nend");
+        "if x = 1 then\nabs(x)\nelse\nabs(y)\nendif");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -38,7 +38,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void NoElseBranch_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x = 1 then\nExceptionsOff\nabs(x)\nend");
+        "if x = 1 then\nExceptionsOff()\nabs(x)\nendif");
       TestHelper.AssertNoMessages(report);
     }
   }

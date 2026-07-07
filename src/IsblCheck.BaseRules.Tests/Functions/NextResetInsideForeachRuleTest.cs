@@ -14,7 +14,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void NextInsideForeach_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "foreach x in arr do\nx.Next()\nend");
+        "foreach x in arr do\nx.Next()\nendforeach");
       TestHelper.AssertSingleMessage(report, "F041", Severity.Error);
     }
 
@@ -29,7 +29,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void NoNextCall_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "foreach x in arr do\nabs(x)\nend");
+        "foreach x in arr do\nabs(x)\nendforeach");
       TestHelper.AssertNoMessages(report);
     }
   }

@@ -15,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ConnectionClosed_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "conn = CreateConnection()\nconn.Open()\nconn.Close()");
+        "conn = CreateConnection(conn)\nconn.Open()\nconn.Close()");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -23,15 +23,14 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ConnectionLeak_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "conn = CreateConnection()\nconn.Open()");
+        "conn = CreateConnection(conn)\nconn.Open()");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected connection leak warning");
     }
 
     [TestMethod]
     public void NoConnection_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule,
-        "x = 1\ny = 2");
+      var report = TestHelper.ApplyRule(rule, "x = 1\ny = 2");
       TestHelper.AssertNoMessages(report);
     }
   }

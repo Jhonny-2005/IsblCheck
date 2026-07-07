@@ -15,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void WhileTrueWithoutExit_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "while True do\nx = 1\nend");
+        "while True do\nx = 1\nendwhile");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected infinite loop warning");
     }
 
@@ -23,7 +23,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void WhileTrueWithExitFor_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "while True do\nif x > 10 then\nexitfor\nend\nx = x + 1\nend");
+        "while True do\nif x > 10 then\nexitfor\nend\nx = x + 1\nendwhile");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -31,15 +31,14 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void WhileCondition_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "while x > 0 do\nx = x - 1\nend");
+        "while x > 0 do\nx = x - 1\nendwhile");
       TestHelper.AssertNoMessages(report);
     }
 
     [TestMethod]
     public void NoWhileLoop_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule,
-        "x = 1\ny = 2");
+      var report = TestHelper.ApplyRule(rule, "x = 1\ny = 2");
       TestHelper.AssertNoMessages(report);
     }
   }

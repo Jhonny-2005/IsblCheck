@@ -13,21 +13,24 @@ namespace IsblCheck.BaseRules.Tests.Functions
     [TestMethod]
     public void StringCompareOnNumber_ShouldReport()
     {
-      var report = TestHelper.ApplyRule(rule, "if x == 5 then\nabs(x)\nend");
+      var report = TestHelper.ApplyRule(rule,
+        "if x == 5 then\nabs(x)\nendif");
       TestHelper.AssertSingleMessage(report, "F050", Severity.Warning);
     }
 
     [TestMethod]
     public void NumericCompare_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule, "if x = 5 then\nabs(x)\nend");
+      var report = TestHelper.ApplyRule(rule,
+        "if x = 5 then\nabs(x)\nendif");
       TestHelper.AssertNoMessages(report);
     }
 
     [TestMethod]
     public void StringCompareOnString_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule, "if x == \"hello\" then\nabs(x)\nend");
+      var report = TestHelper.ApplyRule(rule,
+        "if x == \"hello\" then\nabs(x)\nendif");
       TestHelper.AssertNoMessages(report);
     }
   }

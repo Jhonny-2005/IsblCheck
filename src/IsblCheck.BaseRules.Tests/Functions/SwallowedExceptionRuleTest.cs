@@ -15,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ExceptionHandled_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "try\nx = 1\nexcept\nlog(GetLastException())\nend");
+        "try\nx = 1\nexcept\nlog(GetLastException())\nendexcept");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -23,15 +23,14 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ExceptionSwallowed_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "try\nx = 1\nexcept\nend");
+        "try\nx = 1\nexcept\nFreeException()\nendexcept");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected swallowed exception info");
     }
 
     [TestMethod]
     public void NoTryBlock_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule,
-        "x = 1\ny = 2");
+      var report = TestHelper.ApplyRule(rule, "x = 1\ny = 2");
       TestHelper.AssertNoMessages(report);
     }
   }

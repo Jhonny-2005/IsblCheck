@@ -30,17 +30,16 @@ namespace IsblCheck.BaseRules.Tests.Functions
     [TestMethod]
     public void NoExceptionsOff_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule,
-        "x = 1\ny = 2");
+      var report = TestHelper.ApplyRule(rule, "x = 1\ny = 2");
       TestHelper.AssertNoMessages(report);
     }
 
     [TestMethod]
-    public void SingleExceptionsOff_NoReport()
+    public void SingleExceptionsOff_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
         "ExceptionsOff()\nx = 1");
-      TestHelper.AssertNoMessages(report);
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected unbalanced exceptions warning");
     }
   }
 }

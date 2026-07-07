@@ -34,7 +34,8 @@ namespace IsblCheck.BaseRules.Tests.Variables
     [TestMethod]
     public void VariableInForeach_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule, "foreach x in arr do\nabs(x)\nend");
+      var report = TestHelper.ApplyRule(rule,
+        "foreach x in arr do\nabs(x)\nendforeach");
       TestHelper.AssertNoMessages(report);
     }
 

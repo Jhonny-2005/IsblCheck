@@ -72,7 +72,7 @@ namespace IsblCheck.BaseRules.Other
         .Concat(multiLineCommentRegex.Matches(document.Text).OfType<Match>());
       foreach (var match in allCommentsMatches)
       {
-        var commentBody = match.Groups[1].Value;
+        var commentBody = match.Groups[2].Value;
         if (todoDoneCommentBodyRegex.IsMatch(commentBody))
         {
           var comment = match.Value.Trim();

@@ -14,8 +14,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     [TestMethod]
     public void MessageBoxInNonEvent_NoReport()
     {
-      var report = TestHelper.ApplyRule(rule,
-        "MessageBox(\"Hello\")");
+      var report = TestHelper.ApplyRule(rule, "MessageBox(\"Hello\")");
       TestHelper.AssertNoMessages(report);
     }
 
@@ -32,7 +31,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void InputDialogInEvent_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "InputBox(\"Enter value\")",
+        "InputDialog(\"Enter value\")",
         path: "Events.BeforeUpdate");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected interactive windows warning");
     }
