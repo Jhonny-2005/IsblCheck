@@ -1,0 +1,9 @@
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck\Release\IsblCheck.Reports.dll
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck\Release\IsblCheck.Reports.pdb
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Reports.csproj.AssemblyReference.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Reports.Properties.Resources.resources
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Reports.csproj.GenerateResource.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Reports.csproj.CoreCompileInputs.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblChec.247ADBC9.Up2Date
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Reports.dll
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Reports.pdb

@@ -1,0 +1,6 @@
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.Core\..\..\artifacts\obj\IsblCheck\Release\IsblLexer.cs
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.Core\..\..\artifacts\obj\IsblCheck\Release\IsblParser.cs
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.Core\..\..\artifacts\obj\IsblCheck\Release\IsblListener.cs
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.Core\..\..\artifacts\obj\IsblCheck\Release\IsblBaseListener.cs
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.Core\..\..\artifacts\obj\IsblCheck\Release\IsblVisitor.cs
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.Core\..\..\artifacts\obj\IsblCheck\Release\IsblBaseVisitor.cs

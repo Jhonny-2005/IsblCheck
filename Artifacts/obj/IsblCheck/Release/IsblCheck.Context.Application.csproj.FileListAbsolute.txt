@@ -1,0 +1,7 @@
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck\Release\IsblCheck.Context.Application.dll
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck\Release\IsblCheck.Context.Application.pdb
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Context.Application.csproj.AssemblyReference.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Context.Application.csproj.CoreCompileInputs.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblChec.9FD28ECA.Up2Date
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Context.Application.dll
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Context.Application.pdb

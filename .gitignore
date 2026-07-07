@@ -213,10 +213,12 @@ ModelManifest.xml
 
 *.bak
 
-# Build output directories
-Artifacts/
+# Build output directories (кроме Release)
 [Dd]ebug/
 [Rr]elease/
+
+# Логи приложения
+Artifacts/*.log
 
 # NuGet binary
 nuget.exe
