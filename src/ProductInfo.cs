@@ -4,5 +4,5 @@ using System.Reflection;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCompany("Компания DIRECTUM")]
 [assembly: AssemblyCopyright("Copyright © Компания DIRECTUM 2018-2026")]
-[assembly: AssemblyInformationalVersion("2.0.0.0000")]
+[assembly: AssemblyInformationalVersion("2.1.0.0000")]
 

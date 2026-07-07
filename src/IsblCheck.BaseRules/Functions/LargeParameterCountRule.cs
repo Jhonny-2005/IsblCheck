@@ -12,7 +12,7 @@ namespace IsblCheck.BaseRules.Functions
 {
   internal class LargeParameterCountRule : AbstractRule
   {
-    private const string Code = "F019";
+    private const string Code = "F027";
     private const int MaxParameterCount = 10;
 
     private static readonly Lazy<IRuleInfo> info = new Lazy<IRuleInfo>(() =>

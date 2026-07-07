@@ -37,6 +37,11 @@ namespace IsblCheck.BaseRules
       this.Register<LargeParameterCountRule>(LargeParameterCountRule.Info);
       this.Register<SwallowedExceptionRule>(SwallowedExceptionRule.Info);
       this.Register<MissingErrorHandlingInEventsRule>(MissingErrorHandlingInEventsRule.Info);
+      this.Register<UnreachableCodeRule>(UnreachableCodeRule.Info);
+      this.Register<InfiniteLoopRule>(InfiniteLoopRule.Info);
+      this.Register<NestedTransactionRule>(NestedTransactionRule.Info);
+      this.Register<ExceptionsOffBalanceRule>(ExceptionsOffBalanceRule.Info);
+      this.Register<MagicNumberRule>(MagicNumberRule.Info);
 
       #endregion
 
@@ -76,6 +81,7 @@ namespace IsblCheck.BaseRules
       this.Register<UnsafeSQLConcatRule>(UnsafeSQLConcatRule.Info);
       this.Register<HardcodedCredentialRule>(HardcodedCredentialRule.Info);
       this.Register<SQLInjectionDirectConcatRule>(SQLInjectionDirectConcatRule.Info);
+      this.Register<ShellExecRule>(ShellExecRule.Info);
 
       #endregion
     }

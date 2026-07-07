@@ -63,6 +63,11 @@
     <Compile Include="Functions\LargeParameterCountRule.cs" />
     <Compile Include="Functions\SwallowedExceptionRule.cs" />
     <Compile Include="Functions\MissingErrorHandlingInEventsRule.cs" />
+    <Compile Include="Functions\UnreachableCodeRule.cs" />
+    <Compile Include="Functions\InfiniteLoopRule.cs" />
+    <Compile Include="Functions\NestedTransactionRule.cs" />
+    <Compile Include="Functions\ExceptionsOffBalanceRule.cs" />
+    <Compile Include="Functions\MagicNumberRule.cs" />
     <Compile Include="Functions\FunctionTooBigRule.cs" />
     <Compile Include="Functions\FunctionWithoutHelpRule.cs" />
     <Compile Include="Functions\IncorrectFunctionParamsCountRule.cs" />
@@ -92,6 +97,7 @@
     <Compile Include="Security\UnsafeSQLConcatRule.cs" />
     <Compile Include="Security\HardcodedCredentialRule.cs" />
     <Compile Include="Security\SQLInjectionDirectConcatRule.cs" />
+    <Compile Include="Security\ShellExecRule.cs" />
     <Compile Include="Variables\SelfAssignmentVarRule.cs" />
     <Compile Include="Variables\UsingNotAssignedVarRule.cs" />
     <Compile Include="Variables\UsingRedefindedVarRule.cs" />

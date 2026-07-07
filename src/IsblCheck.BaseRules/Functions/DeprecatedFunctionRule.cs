@@ -16,7 +16,7 @@ namespace IsblCheck.BaseRules.Functions
   /// </summary>
   internal class DeprecatedFunctionRule : AbstractRule
   {
-    private const string Code = "F004";
+    private const string Code = "F025";
 
     private static readonly Lazy<IRuleInfo> info = new Lazy<IRuleInfo>(() =>
       new RuleInfo(typeof(DeprecatedFunctionRule).Name, "Правило поиска использования устаревших функций ISBL, заменённых в Directum 5.8."), true);

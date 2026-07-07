@@ -11,7 +11,7 @@ namespace IsblCheck.BaseRules.Functions
 {
   internal class ConnectionLeakRule : AbstractRule
   {
-    private const string Code = "F018";
+    private const string Code = "F026";
 
     private static readonly Lazy<IRuleInfo> info = new Lazy<IRuleInfo>(() =>
       new RuleInfo(typeof(ConnectionLeakRule).Name, "Правило обнаружения утечек соединений (создание без закрытия)."), true);

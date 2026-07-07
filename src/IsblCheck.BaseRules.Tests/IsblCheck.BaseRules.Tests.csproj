@@ -57,6 +57,11 @@
     <Compile Include="Functions\ConnectionLeakRuleTest.cs" />
     <Compile Include="Functions\SwallowedExceptionRuleTest.cs" />
     <Compile Include="Functions\MissingErrorHandlingInEventsRuleTest.cs" />
+    <Compile Include="Functions\UnreachableCodeRuleTest.cs" />
+    <Compile Include="Functions\InfiniteLoopRuleTest.cs" />
+    <Compile Include="Functions\NestedTransactionRuleTest.cs" />
+    <Compile Include="Functions\ExceptionsOffBalanceRuleTest.cs" />
+    <Compile Include="Functions\MagicNumberRuleTest.cs" />
     <Compile Include="Functions\LargeParameterCountRuleTest.cs" />
     <Compile Include="Functions\InteractiveWindowsOnEventsTest.cs" />
     <Compile Include="Functions\SingleFormatArgumentRuleTest.cs" />
@@ -66,6 +71,7 @@
     <Compile Include="Security\SQLInjectionDirectConcatRuleTest.cs" />
     <Compile Include="Security\HardcodedCredentialRuleTest.cs" />
     <Compile Include="Security\UnsafeSQLConcatRuleTest.cs" />
+    <Compile Include="Security\ShellExecRuleTest.cs" />
     <Compile Include="LogicalExpressions\UsingTrueFalseKeywordsRuleTest.cs" />
     <Compile Include="ObjectModel\UsingInfoReferenceRuleTest.cs" />
     <Compile Include="ObjectModel\RecoveryObjectStateRuleTest.cs" />
