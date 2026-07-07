@@ -1,0 +1,75 @@
+<Project>
+  <PropertyGroup>
+    <FrameworkPathOverride Condition="'$(FrameworkPathOverride)' == ''">C:\Programming\ISBL_NEW\Git\packages\Microsoft.NETFramework.ReferenceAssemblies.net45.1.0.3\build\.NETFramework\v4.5</FrameworkPathOverride>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Runtime">
+      <HintPath>$(FrameworkPathOverride)\System.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.ObjectModel">
+      <HintPath>$(FrameworkPathOverride)\System.ObjectModel.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Linq.Expressions">
+      <HintPath>$(FrameworkPathOverride)\System.Linq.Expressions.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.IO">
+      <HintPath>$(FrameworkPathOverride)\System.IO.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Diagnostics.Debug">
+      <HintPath>$(FrameworkPathOverride)\System.Diagnostics.Debug.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Threading">
+      <HintPath>$(FrameworkPathOverride)\System.Threading.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>$(FrameworkPathOverride)\System.Threading.Tasks.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Collections">
+      <HintPath>$(FrameworkPathOverride)\System.Collections.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Linq">
+      <HintPath>$(FrameworkPathOverride)\System.Linq.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel">
+      <HintPath>$(FrameworkPathOverride)\System.ComponentModel.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.Annotations">
+      <HintPath>$(FrameworkPathOverride)\System.ComponentModel.Annotations.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.Primitives">
+      <HintPath>$(FrameworkPathOverride)\System.ComponentModel.Primitives.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Extensions">
+      <HintPath>$(FrameworkPathOverride)\System.Runtime.Extensions.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization.Primitives">
+      <HintPath>$(FrameworkPathOverride)\System.Runtime.Serialization.Primitives.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Xml.ReaderWriter">
+      <HintPath>$(FrameworkPathOverride)\System.Xml.ReaderWriter.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Xml.XDocument">
+      <HintPath>$(FrameworkPathOverride)\System.Xml.XDocument.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="System.Collections.Concurrent">
+      <HintPath>$(FrameworkPathOverride)\System.Collections.Concurrent.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

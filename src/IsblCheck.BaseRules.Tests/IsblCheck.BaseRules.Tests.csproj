@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B1A2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>IsblCheck.BaseRules.Tests</RootNamespace>
+    <AssemblyName>IsblCheck.BaseRules.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MSTest.TestFramework.1.3.2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.VisualStudio.TestPlatform, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MSTest.TestFramework.1.3.2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.VisualStudio.TestPlatform.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ContextHelper.cs" />
+    <Compile Include="TestHelper.cs" />
+    <Compile Include="Variables\UsingNotAssignedVarRuleTest.cs" />
+    <Compile Include="Variables\UsingRedefinedVarRuleTest.cs" />
+    <Compile Include="Variables\NotUsedVarRuleTest.cs" />
+    <Compile Include="Variables\SelfAssignmentVarRuleTest.cs" />
+    <Compile Include="Functions\IncorrectFunctionParamsCountRuleTest.cs" />
+    <Compile Include="Functions\IncorrectFormatStringRuleTest.cs" />
+    <Compile Include="Functions\DeprecatedFunctionRuleTest.cs" />
+    <Compile Include="Functions\FunctionTooBigRuleTest.cs" />
+    <Compile Include="Functions\ExceptionClassNotSpecifiedRuleTest.cs" />
+    <Compile Include="Functions\TransactionSafetyRuleTest.cs" />
+    <Compile Include="Functions\ConnectionLeakRuleTest.cs" />
+    <Compile Include="Functions\SwallowedExceptionRuleTest.cs" />
+    <Compile Include="Functions\MissingErrorHandlingInEventsRuleTest.cs" />
+    <Compile Include="Functions\LargeParameterCountRuleTest.cs" />
+    <Compile Include="Functions\InteractiveWindowsOnEventsTest.cs" />
+    <Compile Include="Functions\SingleFormatArgumentRuleTest.cs" />
+    <Compile Include="Functions\FunctionWithoutHelpRuleTest.cs" />
+    <Compile Include="Functions\UsingNonExistingLocalizationStringRuleTest.cs" />
+    <Compile Include="Functions\UsingNotExistedReferenceRuleTest.cs" />
+    <Compile Include="Security\SQLInjectionDirectConcatRuleTest.cs" />
+    <Compile Include="Security\HardcodedCredentialRuleTest.cs" />
+    <Compile Include="Security\UnsafeSQLConcatRuleTest.cs" />
+    <Compile Include="LogicalExpressions\UsingTrueFalseKeywordsRuleTest.cs" />
+    <Compile Include="ObjectModel\UsingInfoReferenceRuleTest.cs" />
+    <Compile Include="ObjectModel\RecoveryObjectStateRuleTest.cs" />
+    <Compile Include="Other\TodoDoneCommentsRuleTest.cs" />
+    <Compile Include="Other\EmptyCatchBlockRuleTest.cs" />
+    <Compile Include="Other\DeepNestingRuleTest.cs" />
+    <Compile Include="Other\UnconditionalExitForRuleTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IsblCheck.Core\IsblCheck.Core.csproj">
+      <Project>{649C4B83-058D-4BCA-B662-6B54D86FDDF7}</Project>
+      <Name>IsblCheck.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IsblCheck.BaseRules\IsblCheck.BaseRules.csproj">
+      <Project>{A7C11268-36F9-457E-8901-9EC2E0B675FB}</Project>
+      <Name>IsblCheck.BaseRules</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
