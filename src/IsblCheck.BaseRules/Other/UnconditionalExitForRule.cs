@@ -27,7 +27,7 @@ namespace IsblCheck.BaseRules.Other
         if (context.Parent is IsblParser.StatementBlockContext block &&
             block.Parent is IsblParser.ForeachStatementContext foreachStmt)
         {
-          if (foreachStmt.GetChild(3) == block)
+          if (foreachStmt.GetChild(4) == block)
           {
             UnconditionalExits.Add(context);
           }

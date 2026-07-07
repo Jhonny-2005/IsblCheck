@@ -42,6 +42,11 @@ namespace IsblCheck.BaseRules
       this.Register<NestedTransactionRule>(NestedTransactionRule.Info);
       this.Register<ExceptionsOffBalanceRule>(ExceptionsOffBalanceRule.Info);
       this.Register<MagicNumberRule>(MagicNumberRule.Info);
+      this.Register<StringComparisonMisuseRule>(StringComparisonMisuseRule.Info);
+      this.Register<SilentExceptionSwallowRule>(SilentExceptionSwallowRule.Info);
+      this.Register<BranchedExceptionsOffRule>(BranchedExceptionsOffRule.Info);
+      this.Register<InteractiveWindowOnWorkflowRule>(InteractiveWindowOnWorkflowRule.Info);
+      this.Register<MagicStringRule>(MagicStringRule.Info);
 
       #endregion
 
@@ -64,6 +69,7 @@ namespace IsblCheck.BaseRules
       this.Register<UsingRedefinedVarRule>(UsingRedefinedVarRule.Info);
       this.Register<NotUsedVarRule>(NotUsedVarRule.Info);
       this.Register<SelfAssignmentVarRule>(SelfAssignmentVarRule.Info);
+      this.Register<NullVsNilConfusionRule>(NullVsNilConfusionRule.Info);
 
       #endregion
 
@@ -73,6 +79,7 @@ namespace IsblCheck.BaseRules
       this.Register<EmptyCatchBlockRule>(EmptyCatchBlockRule.Info);
       this.Register<DeepNestingRule>(DeepNestingRule.Info);
       this.Register<UnconditionalExitForRule>(UnconditionalExitForRule.Info);
+      this.Register<DeprecatedEventVariableRule>(DeprecatedEventVariableRule.Info);
 
       #endregion
 
@@ -82,6 +89,7 @@ namespace IsblCheck.BaseRules
       this.Register<HardcodedCredentialRule>(HardcodedCredentialRule.Info);
       this.Register<SQLInjectionDirectConcatRule>(SQLInjectionDirectConcatRule.Info);
       this.Register<ShellExecRule>(ShellExecRule.Info);
+      this.Register<RegWriteRule>(RegWriteRule.Info);
 
       #endregion
     }

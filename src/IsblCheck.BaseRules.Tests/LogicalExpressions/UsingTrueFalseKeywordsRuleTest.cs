@@ -15,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.LogicalExpressions
     {
       var report = TestHelper.ApplyRule(rule,
         "if x = True then\nabs(x)\nend");
-      TestHelper.AssertSingleMessage(report, "L001", Severity.Warning);
+      TestHelper.AssertSingleMessage(report, "B003", Severity.Warning);
     }
 
     [TestMethod]
@@ -23,7 +23,7 @@ namespace IsblCheck.BaseRules.Tests.LogicalExpressions
     {
       var report = TestHelper.ApplyRule(rule,
         "if x = False then\nabs(x)\nend");
-      TestHelper.AssertSingleMessage(report, "L001", Severity.Warning);
+      TestHelper.AssertSingleMessage(report, "B003", Severity.Warning);
     }
 
     [TestMethod]

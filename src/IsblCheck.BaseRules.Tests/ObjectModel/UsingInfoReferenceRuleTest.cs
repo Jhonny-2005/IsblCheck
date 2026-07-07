@@ -15,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.ObjectModel
     {
       var report = TestHelper.ApplyRule(rule,
         "x = Info.Reference");
-      TestHelper.AssertSingleMessage(report, "O001", Severity.Warning);
+      TestHelper.AssertSingleMessage(report, "I013", Severity.Warning);
     }
 
     [TestMethod]

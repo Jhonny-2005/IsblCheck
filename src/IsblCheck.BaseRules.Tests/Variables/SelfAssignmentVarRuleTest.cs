@@ -14,7 +14,7 @@ namespace IsblCheck.BaseRules.Tests.Variables
     public void SelfAssignment_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule, "x = x");
-      TestHelper.AssertSingleMessage(report, "A004", Severity.Warning);
+      TestHelper.AssertSingleMessage(report, "A005", Severity.Warning);
     }
 
     [TestMethod]
@@ -28,7 +28,7 @@ namespace IsblCheck.BaseRules.Tests.Variables
     public void PredefinedVariableSelfAssignment_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule, "!Sender = !Sender");
-      TestHelper.AssertSingleMessage(report, "A004", Severity.Warning);
+      TestHelper.AssertSingleMessage(report, "A005", Severity.Warning);
     }
 
     [TestMethod]

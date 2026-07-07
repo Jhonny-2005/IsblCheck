@@ -34,6 +34,7 @@ namespace IsblCheck.BaseRules.Functions
     private class ExceptionsBalanceListener : IsblBaseListener
     {
       public List<IsblParser.FunctionContext> UnbalancedOffCalls { get; } = new List<IsblParser.FunctionContext>();
+      public int FinalBalance => balance;
       private int balance = 0;
 
       public override void EnterFunction(IsblParser.FunctionContext context)
@@ -65,6 +66,11 @@ namespace IsblCheck.BaseRules.Functions
       foreach (var call in listener.UnbalancedOffCalls)
       {
         report.AddError(Code, "Несбалансированный вызов ExceptionsOff:_exceptions подавлены без восстановления.", document, call.identifier().GetTextPosition());
+      }
+
+      if (listener.FinalBalance > 0)
+      {
+        report.AddError(Code, "ExceptionsOff вызван без соответствующего ExceptionsOn: исключения подавлены до конца области.", document, new TextPosition { Line = 1, Column = 0, StartIndex = 0, EndIndex = 0 });
       }
     }
   }

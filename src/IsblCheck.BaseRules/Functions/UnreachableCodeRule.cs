@@ -10,14 +10,14 @@ using IsblCheck.Core.Rules;
 namespace IsblCheck.BaseRules.Functions
 {
   /// <summary>
-  /// Правило обнаружения недостижимого кода после ExitFor/Exit.
+  /// Правило обнаружения недостижимого кода после ExitFor.
   /// </summary>
   internal class UnreachableCodeRule : AbstractRule
   {
     private const string Code = "F028";
 
     private static readonly Lazy<IRuleInfo> info = new Lazy<IRuleInfo>(() =>
-      new RuleInfo(typeof(UnreachableCodeRule).Name, "Правило обнаружения недостижимого кода после ExitFor/Exit."), true);
+      new RuleInfo(typeof(UnreachableCodeRule).Name, "Правило обнаружения недостижимого кода после ExitFor."), true);
 
     public static IRuleInfo Info => info.Value;
 
@@ -26,11 +26,6 @@ namespace IsblCheck.BaseRules.Functions
       public List<IsblParser.StatementContext> UnreachableStatements { get; } = new List<IsblParser.StatementContext>();
 
       public override void EnterExitforStatement(IsblParser.ExitforStatementContext context)
-      {
-        CheckForUnreachableCode(context);
-      }
-
-      public override void EnterExitStatement(IsblParser.ExitStatementContext context)
       {
         CheckForUnreachableCode(context);
       }
@@ -77,7 +72,7 @@ namespace IsblCheck.BaseRules.Functions
 
       foreach (var stmt in listener.UnreachableStatements)
       {
-        report.AddWarning(Code, "Недостижимый код после ExitFor/Exit.", document, stmt.Start.ToTextPosition());
+        report.AddWarning(Code, "Недостижимый код после ExitFor.", document, stmt.Start.ToTextPosition());
       }
     }
   }
