@@ -1,0 +1,17 @@
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.BaseRules.csproj.AssemblyReference.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.BaseRules.Properties.Resources.resources
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.BaseRules.csproj.GenerateResource.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.BaseRules.csproj.CoreCompileInputs.cache
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\IsblCheck.BaseRules.dll
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\IsblCheck.BaseRules.pdb
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Antlr4.Runtime.dll
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Common.Logging.Core.dll
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Common.Logging.dll
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Antlr4.Runtime.xml
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Common.Logging.pdb
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Common.Logging.xml
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Common.Logging.Core.pdb
+C:\Programming\ISBL_NEW\Git\src\IsblCheck.BaseRules\Release\Common.Logging.Core.xml
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblChec.4E89B882.Up2Date
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.BaseRules.dll
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.BaseRules.pdb

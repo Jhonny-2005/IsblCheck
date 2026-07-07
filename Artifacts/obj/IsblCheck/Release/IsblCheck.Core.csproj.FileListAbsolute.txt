@@ -1,0 +1,16 @@
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Core.csproj.AssemblyReference.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblLexer.cs
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblParser.cs
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblListener.cs
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblBaseListener.cs
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblVisitor.cs
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblBaseVisitor.cs
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Core.csproj.Antlr4GeneratedCodeFileListAbsolute.txt
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Core.Properties.Resources.resources
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Core.csproj.GenerateResource.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Core.csproj.CoreCompileInputs.cache
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck\Release\IsblCheck.Core.dll
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck\Release\IsblCheck.Core.pdb
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblChec.5720D894.Up2Date
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Core.dll
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Core.pdb

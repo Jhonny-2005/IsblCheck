@@ -1,0 +1,8 @@
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck.Agent\Release\IsblCheck.Agent.exe.config
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck.Agent\Release\IsblCheck.Agent.exe
+C:\Programming\ISBL_NEW\Git\artifacts\bin\IsblCheck.Agent\Release\IsblCheck.Agent.pdb
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Agent.csproj.AssemblyReference.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Agent.csproj.CoreCompileInputs.cache
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblChec.3EB5EB97.Up2Date
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Agent.exe
+C:\Programming\ISBL_NEW\Git\artifacts\obj\IsblCheck\Release\IsblCheck.Agent.pdb
