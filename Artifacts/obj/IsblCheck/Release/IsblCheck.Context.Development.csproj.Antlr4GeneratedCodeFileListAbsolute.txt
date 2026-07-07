@@ -1,6 +1,0 @@
-C:\Programming\ISBL_NEW\Git\src\IsblCheck.Context.Development\..\..\artifacts\obj\IsblCheck\Release\DfmGrammarLexer.cs
-C:\Programming\ISBL_NEW\Git\src\IsblCheck.Context.Development\..\..\artifacts\obj\IsblCheck\Release\DfmGrammarParser.cs
-C:\Programming\ISBL_NEW\Git\src\IsblCheck.Context.Development\..\..\artifacts\obj\IsblCheck\Release\DfmGrammarListener.cs
-C:\Programming\ISBL_NEW\Git\src\IsblCheck.Context.Development\..\..\artifacts\obj\IsblCheck\Release\DfmGrammarBaseListener.cs
-C:\Programming\ISBL_NEW\Git\src\IsblCheck.Context.Development\..\..\artifacts\obj\IsblCheck\Release\DfmGrammarVisitor.cs
-C:\Programming\ISBL_NEW\Git\src\IsblCheck.Context.Development\..\..\artifacts\obj\IsblCheck\Release\DfmGrammarBaseVisitor.cs

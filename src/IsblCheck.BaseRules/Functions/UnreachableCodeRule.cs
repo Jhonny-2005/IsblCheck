@@ -23,42 +23,26 @@ namespace IsblCheck.BaseRules.Functions
 
     private class UnreachableCodeListener : IsblBaseListener
     {
-      public List<IsblParser.StatementContext> UnreachableStatements { get; } = new List<IsblParser.StatementContext>();
+      public List<IsblParser.ExitforStatementContext> UnreachableExits { get; } = new List<IsblParser.ExitforStatementContext>();
 
       public override void EnterExitforStatement(IsblParser.ExitforStatementContext context)
       {
-        CheckForUnreachableCode(context);
-      }
-
-      private void CheckForUnreachableCode(ParserRuleContext exitContext)
-      {
-        var parent = exitContext.Parent;
+        var parent = context.Parent as IsblParser.StatementBlockContext;
         if (parent == null) return;
 
-        if (parent is IsblParser.StatementBlockContext block)
+        var exitIndex = -1;
+        for (int i = 0; i < parent.ChildCount; i++)
         {
-          var exitIndex = -1;
-          for (int i = 0; i < block.ChildCount; i++)
+          if (parent.GetChild(i) == context)
           {
-            if (block.GetChild(i) == exitContext)
-            {
-              exitIndex = i;
-              break;
-            }
+            exitIndex = i;
+            break;
           }
+        }
 
-          if (exitIndex >= 0 && exitIndex < block.ChildCount - 1)
-          {
-            for (int i = exitIndex + 1; i < block.ChildCount; i++)
-            {
-              var child = block.GetChild(i);
-              if (child is IsblParser.StatementContext stmt && !(child is IsblParser.EmptyStatementContext))
-              {
-                UnreachableStatements.Add(stmt);
-                break;
-              }
-            }
-          }
+        if (exitIndex >= 0 && exitIndex < parent.ChildCount - 1)
+        {
+          UnreachableExits.Add(context);
         }
       }
     }
@@ -70,9 +54,9 @@ namespace IsblCheck.BaseRules.Functions
       var listener = new UnreachableCodeListener();
       walker.Walk(listener, tree);
 
-      foreach (var stmt in listener.UnreachableStatements)
+      foreach (var exit in listener.UnreachableExits)
       {
-        report.AddWarning(Code, "Недостижимый код после ExitFor.", document, stmt.Start.ToTextPosition());
+        report.AddWarning(Code, "Недостижимый код после ExitFor.", document, exit.Start.ToTextPosition());
       }
     }
   }
