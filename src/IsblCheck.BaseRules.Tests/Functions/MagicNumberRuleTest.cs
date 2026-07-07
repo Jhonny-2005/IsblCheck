@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "x = 42");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected magic number info");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected magic number info");
     }
 
     [TestMethod]
@@ -39,7 +40,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "x = 100\ny = 200\nz = 300");
-      Assert.IsTrue(report.Messages.Count >= 3, "Expected at least 3 magic number warnings");
+      Assert.IsTrue(report.Messages.Count() >= 3, "Expected at least 3 magic number warnings");
     }
   }
 }

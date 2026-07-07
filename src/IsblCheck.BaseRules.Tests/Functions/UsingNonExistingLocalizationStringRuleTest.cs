@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Context.Development;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
@@ -34,7 +35,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "LoadString(\"NonExisting\"; \"MESSAGES\")");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected non-existing localization string error");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected non-existing localization string error");
     }
   }
 }

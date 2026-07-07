@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,7 +17,7 @@ namespace IsblCheck.BaseRules.Tests.Security
       var report = TestHelper.ApplyRule(rule,
         "Shell(\"notepad.exe\")",
         path: "Events.BeforeUpdate");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected shell exec error");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected shell exec error");
     }
 
     [TestMethod]
@@ -34,7 +35,7 @@ namespace IsblCheck.BaseRules.Tests.Security
       var report = TestHelper.ApplyRule(rule,
         "ShellExecute(\"open\"; \"test.exe\")",
         path: "Events.AfterInsert");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected shell exec error");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected shell exec error");
     }
 
     [TestMethod]

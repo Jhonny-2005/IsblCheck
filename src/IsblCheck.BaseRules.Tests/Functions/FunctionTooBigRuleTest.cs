@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -34,7 +35,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
 
       var report = TestHelper.ApplyRule(rule, sb.ToString(),
         componentType: ComponentType.Function);
-      Assert.IsTrue(report.Messages.Count > 0, "Expected function too big warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected function too big warning");
     }
   }
 }

@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "while True do\nx = 1\nend");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected infinite loop warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected infinite loop warning");
     }
 
     [TestMethod]

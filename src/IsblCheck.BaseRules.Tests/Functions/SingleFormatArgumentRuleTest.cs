@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +24,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "Format(\"%0:s\"; ArrayOf(a))");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected single format argument info");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected single format argument info");
     }
 
     [TestMethod]

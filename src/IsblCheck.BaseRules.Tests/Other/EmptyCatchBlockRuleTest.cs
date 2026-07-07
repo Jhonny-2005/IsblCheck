@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Other;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Other
     {
       var report = TestHelper.ApplyRule(rule,
         "try\nx = 1\nexcept\nend");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected empty catch block warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected empty catch block warning");
     }
 
     [TestMethod]

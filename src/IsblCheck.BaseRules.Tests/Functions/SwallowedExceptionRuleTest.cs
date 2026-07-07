@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +24,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "try\nx = 1\nexcept\nend");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected swallowed exception info");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected swallowed exception info");
     }
 
     [TestMethod]

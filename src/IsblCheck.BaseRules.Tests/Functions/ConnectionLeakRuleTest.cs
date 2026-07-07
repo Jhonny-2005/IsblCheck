@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +24,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "conn = CreateConnection()\nconn.Open()");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected connection leak warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected connection leak warning");
     }
 
     [TestMethod]

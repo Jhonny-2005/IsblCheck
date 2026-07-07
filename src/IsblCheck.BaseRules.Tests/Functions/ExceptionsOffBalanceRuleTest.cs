@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "ExceptionsOff()\nx = 1\nExceptionsOff()");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected unbalanced exceptions warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected unbalanced exceptions warning");
     }
 
     [TestMethod]

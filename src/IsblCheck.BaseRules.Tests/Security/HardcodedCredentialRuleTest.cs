@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Security
     {
       var report = TestHelper.ApplyRule(rule,
         "conn = CreateConnection(\"server\"; \"password=secret123\")");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected hardcoded credential warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected hardcoded credential warning");
     }
 
     [TestMethod]

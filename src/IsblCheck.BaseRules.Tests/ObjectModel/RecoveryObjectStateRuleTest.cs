@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +24,7 @@ namespace IsblCheck.BaseRules.Tests.ObjectModel
     {
       var report = TestHelper.ApplyRule(rule,
         "obj = CreateObject()\nobj.Open()");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected unclosed object warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected unclosed object warning");
     }
 
     [TestMethod]

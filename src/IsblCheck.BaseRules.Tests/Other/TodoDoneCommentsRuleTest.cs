@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Other;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Other
     {
       var report = TestHelper.ApplyRule(rule,
         "// TODO: fix this later");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected TODO comment warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected TODO comment warning");
     }
 
     [TestMethod]
@@ -23,7 +24,7 @@ namespace IsblCheck.BaseRules.Tests.Other
     {
       var report = TestHelper.ApplyRule(rule,
         "// DONE: implemented");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected DONE comment warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected DONE comment warning");
     }
 
     [TestMethod]

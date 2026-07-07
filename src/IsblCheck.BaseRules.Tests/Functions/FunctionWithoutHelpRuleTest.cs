@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Context.Development;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
@@ -35,7 +36,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
       var report = TestHelper.ApplyRule(rule, "FuncNoHelp()",
         componentType: ComponentType.Function,
         componentName: "FuncNoHelp");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected function without help warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected function without help warning");
 
       ContextHelper.Context.Development.Functions.Remove(func);
     }

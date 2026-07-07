@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "x = \"MyReference\"");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected magic string info");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected magic string info");
     }
 
     [TestMethod]

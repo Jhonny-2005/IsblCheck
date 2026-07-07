@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Context.Development;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
@@ -29,7 +30,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "ref = CreateReference(\"InvalidRef\")");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected non-existing reference error");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected non-existing reference error");
     }
   }
 }

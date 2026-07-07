@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +16,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "foreach x in arr do\nexitfor\ny = 1\nend");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected unreachable code warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected unreachable code warning");
     }
 
     [TestMethod]
@@ -31,7 +32,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     {
       var report = TestHelper.ApplyRule(rule,
         "function Test() : void\nbegin\nexit()\nx = 1\nend");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected unreachable code warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected unreachable code warning");
     }
 
     [TestMethod]

@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,7 +25,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
       var report = TestHelper.ApplyRule(rule,
         "Format(\"%0:s %1:s\"; ArrayOf(a))");
       // Should report F021 or F005 for missing argument
-      Assert.IsTrue(report.Messages.Count > 0, "Expected format error message");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected format error message");
     }
 
     [TestMethod]
@@ -33,7 +34,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
       var report = TestHelper.ApplyRule(rule,
         "Format(\"%0:s\"; ArrayOf(a; b))");
       // Should report F022 for extra argument
-      Assert.IsTrue(report.Messages.Count > 0, "Expected extra argument warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected extra argument warning");
     }
 
     [TestMethod]

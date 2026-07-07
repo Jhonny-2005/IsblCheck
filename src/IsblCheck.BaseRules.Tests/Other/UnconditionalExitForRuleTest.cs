@@ -1,4 +1,5 @@
 using IsblCheck.Core.Checker;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Other;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +24,7 @@ namespace IsblCheck.BaseRules.Tests.Other
     {
       var report = TestHelper.ApplyRule(rule,
         "foreach x in arr do\nexitfor\nend");
-      Assert.IsTrue(report.Messages.Count > 0, "Expected unconditional exit for warning");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected unconditional exit for warning");
     }
 
     [TestMethod]
