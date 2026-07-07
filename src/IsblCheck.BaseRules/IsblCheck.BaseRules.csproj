@@ -80,6 +80,12 @@
     <Compile Include="Functions\SleepInServerEventsRule.cs" />
     <Compile Include="Functions\TryFinallyWithoutExceptRule.cs" />
     <Compile Include="Functions\MandatoryParameterOmissionRule.cs" />
+    <Compile Include="Functions\InteractiveModeCheckRule.cs" />
+    <Compile Include="Functions\WebRuntimeContextCheckRule.cs" />
+    <Compile Include="Functions\ShowMessageInReportRule.cs" />
+    <Compile Include="Functions\NumericStringComparisonRule.cs" />
+    <Compile Include="Functions\LargeReferenceOnServerRule.cs" />
+    <Compile Include="Functions\NamedExceptionForRetryRule.cs" />
     <Compile Include="Functions\FunctionTooBigRule.cs" />
     <Compile Include="Functions\FunctionWithoutHelpRule.cs" />
     <Compile Include="Functions\IncorrectFunctionParamsCountRule.cs" />
@@ -91,7 +97,6 @@
     <Compile Include="Functions\UsingNonExistingLocalizationStringRule.cs" />
     <Compile Include="Functions\UsingNotExistedReferenceRule.cs" />
     <Compile Include="IContextExtensions.cs" />
-    <Compile Include="LogicalExpressions\UsingTrueFalseKeywordsRule.cs" />
     <Compile Include="Other\TodoDoneCommentsRule.cs" />
     <Compile Include="Other\EmptyCatchBlockRule.cs" />
     <Compile Include="Other\DeepNestingRule.cs" />

@@ -54,12 +54,12 @@ namespace IsblCheck.BaseRules
       this.Register<SleepInServerEventsRule>(SleepInServerEventsRule.Info);
       this.Register<TryFinallyWithoutExceptRule>(TryFinallyWithoutExceptRule.Info);
       this.Register<MandatoryParameterOmissionRule>(MandatoryParameterOmissionRule.Info);
-
-      #endregion
-
-      #region LogicalExpressions
-
-      this.Register<UsingTrueFalseKeywordsRule>(UsingTrueFalseKeywordsRule.Info);
+      this.Register<InteractiveModeCheckRule>(InteractiveModeCheckRule.Info);
+      this.Register<WebRuntimeContextCheckRule>(WebRuntimeContextCheckRule.Info);
+      this.Register<ShowMessageInReportRule>(ShowMessageInReportRule.Info);
+      this.Register<NumericStringComparisonRule>(NumericStringComparisonRule.Info);
+      this.Register<LargeReferenceOnServerRule>(LargeReferenceOnServerRule.Info);
+      this.Register<NamedExceptionForRetryRule>(NamedExceptionForRetryRule.Info);
 
       #endregion
 

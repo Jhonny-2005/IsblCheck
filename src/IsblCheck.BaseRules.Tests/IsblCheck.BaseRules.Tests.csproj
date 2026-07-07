@@ -75,6 +75,12 @@
     <Compile Include="Functions\SleepInServerEventsRuleTest.cs" />
     <Compile Include="Functions\TryFinallyWithoutExceptRuleTest.cs" />
     <Compile Include="Functions\MandatoryParameterOmissionRuleTest.cs" />
+    <Compile Include="Functions\InteractiveModeCheckRuleTest.cs" />
+    <Compile Include="Functions\WebRuntimeContextCheckRuleTest.cs" />
+    <Compile Include="Functions\ShowMessageInReportRuleTest.cs" />
+    <Compile Include="Functions\NumericStringComparisonRuleTest.cs" />
+    <Compile Include="Functions\LargeReferenceOnServerRuleTest.cs" />
+    <Compile Include="Functions\NamedExceptionForRetryRuleTest.cs" />
     <Compile Include="Functions\LargeParameterCountRuleTest.cs" />
     <Compile Include="Functions\InteractiveWindowsOnEventsTest.cs" />
     <Compile Include="Functions\SingleFormatArgumentRuleTest.cs" />
@@ -87,7 +93,6 @@
     <Compile Include="Security\ShellExecRuleTest.cs" />
     <Compile Include="Security\RegWriteRuleTest.cs" />
     <Compile Include="Security\ExecuteInServerEventsRuleTest.cs" />
-    <Compile Include="LogicalExpressions\UsingTrueFalseKeywordsRuleTest.cs" />
     <Compile Include="ObjectModel\UsingInfoReferenceRuleTest.cs" />
     <Compile Include="ObjectModel\RecoveryObjectStateRuleTest.cs" />
     <Compile Include="Other\TodoDoneCommentsRuleTest.cs" />
