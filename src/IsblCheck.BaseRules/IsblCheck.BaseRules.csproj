@@ -73,6 +73,13 @@
     <Compile Include="Functions\BranchedExceptionsOffRule.cs" />
     <Compile Include="Functions\InteractiveWindowOnWorkflowRule.cs" />
     <Compile Include="Functions\MagicStringRule.cs" />
+    <Compile Include="Functions\ExceptionsOffOutsideTryExceptRule.cs" />
+    <Compile Include="Functions\NextResetInsideForeachRule.cs" />
+    <Compile Include="Functions\CreateConnectionWithoutTryExceptRule.cs" />
+    <Compile Include="Functions\ExitInCriticalEventsRule.cs" />
+    <Compile Include="Functions\SleepInServerEventsRule.cs" />
+    <Compile Include="Functions\TryFinallyWithoutExceptRule.cs" />
+    <Compile Include="Functions\MandatoryParameterOmissionRule.cs" />
     <Compile Include="Functions\FunctionTooBigRule.cs" />
     <Compile Include="Functions\FunctionWithoutHelpRule.cs" />
     <Compile Include="Functions\IncorrectFunctionParamsCountRule.cs" />
@@ -105,6 +112,7 @@
     <Compile Include="Security\SQLInjectionDirectConcatRule.cs" />
     <Compile Include="Security\ShellExecRule.cs" />
     <Compile Include="Security\RegWriteRule.cs" />
+    <Compile Include="Security\ExecuteInServerEventsRule.cs" />
     <Compile Include="Variables\SelfAssignmentVarRule.cs" />
     <Compile Include="Variables\UsingNotAssignedVarRule.cs" />
     <Compile Include="Variables\UsingRedefindedVarRule.cs" />

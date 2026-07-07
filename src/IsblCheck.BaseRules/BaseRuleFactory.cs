@@ -47,6 +47,13 @@ namespace IsblCheck.BaseRules
       this.Register<BranchedExceptionsOffRule>(BranchedExceptionsOffRule.Info);
       this.Register<InteractiveWindowOnWorkflowRule>(InteractiveWindowOnWorkflowRule.Info);
       this.Register<MagicStringRule>(MagicStringRule.Info);
+      this.Register<ExceptionsOffOutsideTryExceptRule>(ExceptionsOffOutsideTryExceptRule.Info);
+      this.Register<NextResetInsideForeachRule>(NextResetInsideForeachRule.Info);
+      this.Register<CreateConnectionWithoutTryExceptRule>(CreateConnectionWithoutTryExceptRule.Info);
+      this.Register<ExitInCriticalEventsRule>(ExitInCriticalEventsRule.Info);
+      this.Register<SleepInServerEventsRule>(SleepInServerEventsRule.Info);
+      this.Register<TryFinallyWithoutExceptRule>(TryFinallyWithoutExceptRule.Info);
+      this.Register<MandatoryParameterOmissionRule>(MandatoryParameterOmissionRule.Info);
 
       #endregion
 
@@ -90,6 +97,7 @@ namespace IsblCheck.BaseRules
       this.Register<SQLInjectionDirectConcatRule>(SQLInjectionDirectConcatRule.Info);
       this.Register<ShellExecRule>(ShellExecRule.Info);
       this.Register<RegWriteRule>(RegWriteRule.Info);
+      this.Register<ExecuteInServerEventsRule>(ExecuteInServerEventsRule.Info);
 
       #endregion
     }

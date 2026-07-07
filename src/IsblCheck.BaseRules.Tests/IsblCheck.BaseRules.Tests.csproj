@@ -68,6 +68,13 @@
     <Compile Include="Functions\BranchedExceptionsOffRuleTest.cs" />
     <Compile Include="Functions\InteractiveWindowOnWorkflowRuleTest.cs" />
     <Compile Include="Functions\MagicStringRuleTest.cs" />
+    <Compile Include="Functions\ExceptionsOffOutsideTryExceptRuleTest.cs" />
+    <Compile Include="Functions\NextResetInsideForeachRuleTest.cs" />
+    <Compile Include="Functions\CreateConnectionWithoutTryExceptRuleTest.cs" />
+    <Compile Include="Functions\ExitInCriticalEventsRuleTest.cs" />
+    <Compile Include="Functions\SleepInServerEventsRuleTest.cs" />
+    <Compile Include="Functions\TryFinallyWithoutExceptRuleTest.cs" />
+    <Compile Include="Functions\MandatoryParameterOmissionRuleTest.cs" />
     <Compile Include="Functions\LargeParameterCountRuleTest.cs" />
     <Compile Include="Functions\InteractiveWindowsOnEventsTest.cs" />
     <Compile Include="Functions\SingleFormatArgumentRuleTest.cs" />
@@ -79,6 +86,7 @@
     <Compile Include="Security\UnsafeSQLConcatRuleTest.cs" />
     <Compile Include="Security\ShellExecRuleTest.cs" />
     <Compile Include="Security\RegWriteRuleTest.cs" />
+    <Compile Include="Security\ExecuteInServerEventsRuleTest.cs" />
     <Compile Include="LogicalExpressions\UsingTrueFalseKeywordsRuleTest.cs" />
     <Compile Include="ObjectModel\UsingInfoReferenceRuleTest.cs" />
     <Compile Include="ObjectModel\RecoveryObjectStateRuleTest.cs" />

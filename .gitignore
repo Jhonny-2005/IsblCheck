@@ -40,7 +40,6 @@ dlldata.c
 
 # DNX
 project.lock.json
-artifacts/
 
 *_i.c
 *_p.c
@@ -217,8 +216,15 @@ ModelManifest.xml
 [Dd]ebug/
 [Rr]elease/
 
-# Логи приложения
+# Сборочные артефакты (кроме Release-бинарников и screenshot)
+Artifacts/obj/
+Artifacts/bin/
 Artifacts/*.log
+Artifacts/IsblCheck.PanelContainer.config
+Artifacts/IsblCheck.Agent.exe.config
+
+# Архивы релизов
+*.zip
 
 # NuGet binary
 nuget.exe
