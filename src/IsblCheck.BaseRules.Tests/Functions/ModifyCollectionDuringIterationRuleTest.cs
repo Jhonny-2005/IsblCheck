@@ -6,31 +6,31 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace IsblCheck.BaseRules.Tests.Functions
 {
   [TestClass]
-  public class NumericStringComparisonRuleTest
+  public class ModifyCollectionDuringIterationRuleTest
   {
-    private readonly NumericStringComparisonRule rule = new NumericStringComparisonRule();
+    private readonly ModifyCollectionDuringIterationRule rule = new ModifyCollectionDuringIterationRule();
 
     [TestMethod]
-    public void StringCompareOnNumber_ShouldReport()
+    public void ModifyDuringIteration_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x == 5\nabs(x)\nendif");
-      TestHelper.AssertSingleMessage(report, "F050", Severity.Warning);
+        "foreach x in arr\narr.Delete(x)\nendforeach");
+      TestHelper.AssertSingleMessage(report, "F053", Severity.Error);
     }
 
     [TestMethod]
-    public void NumericCompare_NoReport()
+    public void NoModification_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x = 5\nabs(x)\nendif");
+        "foreach x in arr\nabs(x)\nendforeach");
       TestHelper.AssertNoMessages(report);
     }
 
     [TestMethod]
-    public void NumericNotEqual_NoReport()
+    public void ModifyOutsideForeach_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x <> 5\nabs(x)\nendif");
+        "arr.Delete(x)");
       TestHelper.AssertNoMessages(report);
     }
   }

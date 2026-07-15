@@ -1,4 +1,4 @@
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
 using IsblCheck.BaseRules.Functions;
 using IsblCheck.BaseRules.ObjectModel;
 using IsblCheck.BaseRules.Other;
@@ -9,13 +9,13 @@ using IsblCheck.Core.Rules;
 namespace IsblCheck.BaseRules
 {
   /// <summary>
-  /// Фабрика базовых правил
+  /// Р¤Р°Р±СЂРёРєР° Р±Р°Р·РѕРІС‹С… РїСЂР°РІРёР»
   /// </summary>
   [Export(typeof(IRuleFactory))]
   public class BaseRuleFactory : AbstractRuleFactory
   {
     /// <summary>
-    /// Конструктор.
+    /// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ.
     /// </summary>
     public BaseRuleFactory()
     {
@@ -57,7 +57,11 @@ namespace IsblCheck.BaseRules
       this.Register<ShowMessageInReportRule>(ShowMessageInReportRule.Info);
       this.Register<NumericStringComparisonRule>(NumericStringComparisonRule.Info);
       this.Register<LargeReferenceOnServerRule>(LargeReferenceOnServerRule.Info);
-      this.Register<NamedExceptionForRetryRule>(NamedExceptionForRetryRule.Info);
+            this.Register<NamedExceptionForRetryRule>(NamedExceptionForRetryRule.Info);
+      this.Register<ModifyCollectionDuringIterationRule>(ModifyCollectionDuringIterationRule.Info);
+      this.Register<MissingTryEditBeforeLockRule>(MissingTryEditBeforeLockRule.Info);
+      this.Register<MissingUnlockAfterLockRule>(MissingUnlockAfterLockRule.Info);
+      this.Register<FullReferenceLoadOnServerRule>(FullReferenceLoadOnServerRule.Info);
 
       #endregion
 
@@ -84,7 +88,8 @@ namespace IsblCheck.BaseRules
       this.Register<EmptyCatchBlockRule>(EmptyCatchBlockRule.Info);
       this.Register<DeepNestingRule>(DeepNestingRule.Info);
       this.Register<UnconditionalExitForRule>(UnconditionalExitForRule.Info);
-      this.Register<DeprecatedEventVariableRule>(DeprecatedEventVariableRule.Info);
+            this.Register<DeprecatedEventVariableRule>(DeprecatedEventVariableRule.Info);
+      this.Register<CommentedCodeBlockRule>(CommentedCodeBlockRule.Info);
 
       #endregion
 
@@ -94,9 +99,13 @@ namespace IsblCheck.BaseRules
       this.Register<SQLInjectionDirectConcatRule>(SQLInjectionDirectConcatRule.Info);
       this.Register<ShellExecRule>(ShellExecRule.Info);
       this.Register<RegWriteRule>(RegWriteRule.Info);
-      this.Register<ExecuteInServerEventsRule>(ExecuteInServerEventsRule.Info);
+            this.Register<ExecuteInServerEventsRule>(ExecuteInServerEventsRule.Info);
+      this.Register<FileSystemAccessInServerEventsRule>(FileSystemAccessInServerEventsRule.Info);
+      this.Register<NetworkRequestInServerEventsRule>(NetworkRequestInServerEventsRule.Info);
+      this.Register<HardcodedConnectionStringRule>(HardcodedConnectionStringRule.Info);
 
       #endregion
     }
   }
 }
+

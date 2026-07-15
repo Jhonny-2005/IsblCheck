@@ -1,4 +1,4 @@
-using IsblCheck.Core.Checker;
+﻿using IsblCheck.Core.Checker;
 using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Other;
@@ -14,16 +14,16 @@ namespace IsblCheck.BaseRules.Tests.Other
     [TestMethod]
     public void ShallowNesting_NoReport()
     {
-      var code = "if x > 0 then\nif y > 0 then\nif z > 0 then\nabs(x)\nendif\nendif\nendif";
-      var report = TestHelper.ApplyRule(rule, code);
+      var report = TestHelper.ApplyRule(rule,
+        "if x > 0\nif y > 0\nif z > 0\nabs(x)\nendif\nendif\nendif");
       TestHelper.AssertNoMessages(report);
     }
 
     [TestMethod]
     public void DeepNesting_ShouldReport()
     {
-      var code = "if a > 0 then\nif b > 0 then\nif c > 0 then\nif d > 0 then\nif e > 0 then\nif f > 0 then\nabs(a)\nendif\nendif\nendif\nendif\nendif\nendif";
-      var report = TestHelper.ApplyRule(rule, code);
+      var report = TestHelper.ApplyRule(rule,
+        "if a > 0\nif b > 0\nif c > 0\nif d > 0\nif e > 0\nif f > 0\nabs(a)\nendif\nendif\nendif\nendif\nendif\nendif");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected deep nesting warning");
     }
 
@@ -37,17 +37,17 @@ namespace IsblCheck.BaseRules.Tests.Other
     [TestMethod]
     public void BoundaryFourLevels_NoReport()
     {
-      var code = "if a > 0 then\nif b > 0 then\nif c > 0 then\nif d > 0 then\nabs(a)\nendif\nendif\nendif\nendif";
-      var report = TestHelper.ApplyRule(rule, code);
+      var report = TestHelper.ApplyRule(rule,
+        "if a > 0\nif b > 0\nif c > 0\nif d > 0\nabs(a)\nendif\nendif\nendif\nendif");
       TestHelper.AssertNoMessages(report);
     }
 
     [TestMethod]
-    public void BoundaryFiveLevels_ShouldReport()
+    public void BoundarySixLevels_ShouldReport()
     {
-      var code = "if a > 0 then\nif b > 0 then\nif c > 0 then\nif d > 0 then\nif e > 0 then\nabs(a)\nendif\nendif\nendif\nendif\nendif";
-      var report = TestHelper.ApplyRule(rule, code);
-      Assert.IsTrue(report.Messages.Count() > 0, "Expected deep nesting warning at 5 levels");
+      var report = TestHelper.ApplyRule(rule,
+        "if a > 0\nif b > 0\nif c > 0\nif d > 0\nif e > 0\nif f > 0\nabs(a)\nendif\nendif\nendif\nendif\nendif\nendif");
+      Assert.IsTrue(report.Messages.Count() > 0, "Expected deep nesting warning at 6 levels");
     }
   }
 }

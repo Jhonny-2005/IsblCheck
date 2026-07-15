@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -11,16 +11,11 @@
     <AssemblyName>IsblCheck.BaseRules</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <IntermediateOutputPath>..\..\artifacts\obj\IsblCheck\Debug\</IntermediateOutputPath>
     <OutputPath>Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -29,7 +24,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <IntermediateOutputPath>..\..\artifacts\obj\IsblCheck\Release\</IntermediateOutputPath>
     <OutputPath>Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -85,6 +79,10 @@
     <Compile Include="Functions\NumericStringComparisonRule.cs" />
     <Compile Include="Functions\LargeReferenceOnServerRule.cs" />
     <Compile Include="Functions\NamedExceptionForRetryRule.cs" />
+    <Compile Include="Functions\ModifyCollectionDuringIterationRule.cs" />
+    <Compile Include="Functions\MissingTryEditBeforeLockRule.cs" />
+    <Compile Include="Functions\MissingUnlockAfterLockRule.cs" />
+    <Compile Include="Functions\FullReferenceLoadOnServerRule.cs" />
     <Compile Include="Functions\FunctionTooBigRule.cs" />
     <Compile Include="Functions\FunctionWithoutHelpRule.cs" />
     <Compile Include="Functions\IncorrectFunctionParamsCountRule.cs" />
@@ -101,6 +99,7 @@
     <Compile Include="Other\DeepNestingRule.cs" />
     <Compile Include="Other\UnconditionalExitForRule.cs" />
     <Compile Include="Other\DeprecatedEventVariableRule.cs" />
+    <Compile Include="Other\CommentedCodeBlockRule.cs" />
     <Compile Include="ObjectModel\UsingInfoReferenceRule.cs" />
     <Compile Include="ParserRuleContextExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -116,6 +115,9 @@
     <Compile Include="Security\ShellExecRule.cs" />
     <Compile Include="Security\RegWriteRule.cs" />
     <Compile Include="Security\ExecuteInServerEventsRule.cs" />
+    <Compile Include="Security\FileSystemAccessInServerEventsRule.cs" />
+    <Compile Include="Security\NetworkRequestInServerEventsRule.cs" />
+    <Compile Include="Security\HardcodedConnectionStringRule.cs" />
     <Compile Include="Variables\SelfAssignmentVarRule.cs" />
     <Compile Include="Variables\UsingNotAssignedVarRule.cs" />
     <Compile Include="Variables\UsingRedefindedVarRule.cs" />
@@ -138,15 +140,4 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy $(TargetPath) $(SolutionDir)artifacts\bin\IsblCheck\$(ConfigurationName)\Rules\ /y
-xcopy $(TargetPath) $(SolutionDir)artifacts\bin\IsblCheck.Agent\$(ConfigurationName)\Rules\ /y</PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

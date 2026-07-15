@@ -1,4 +1,4 @@
-<Window x:Class="IsblCheck.Views.PanelContainerWindow"
+﻿<Window x:Class="IsblCheck.Views.PanelContainerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -143,21 +143,21 @@
                 ToolTip="{l:Localization OPEN_PACKAGE}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/AddPackage_20.png" Width="16" Height="16"/>
-              <TextBlock Text="Пакет" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="РџР°РєРµС‚" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Command="{Binding OpenDatabaseCommand, Mode=OneTime}"
                 ToolTip="{l:Localization OPEN_DATABASE}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/AddDatabase_20.png" Width="16" Height="16"/>
-              <TextBlock Text="БД" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="Р‘Р”" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Command="{Binding OpenFolderCommand, Mode=OneTime}"
                 ToolTip="{l:Localization OPEN_FOLDER}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/AddFolder_20.png" Width="16" Height="16"/>
-              <TextBlock Text="Папка" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="РџР°РїРєР°" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Separator/>
@@ -165,14 +165,14 @@
                 ToolTip="{l:Localization CHECK_ACTIVE_TAB}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/Check_20.png" Width="16" Height="16"/>
-              <TextBlock Text="Проверить" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="РџСЂРѕРІРµСЂРёС‚СЊ" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Command="{Binding CheckAllCommand, Mode=OneTime}"
                 ToolTip="{l:Localization CHECK_OPENED_TABS}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/CheckAll_20.png" Width="16" Height="16"/>
-              <TextBlock Text="Проверить всё" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="РџСЂРѕРІРµСЂРёС‚СЊ РІСЃС‘" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
         </ToolBar>
@@ -210,9 +210,10 @@
         </StatusBarItem>
         <Separator Background="#005A9E"/>
         <StatusBarItem Style="{StaticResource ModernStatusBarItem}">
-          <TextBlock Text="ISBL Check 2.8.0 | Directum 5.8" FontSize="11"/>
+          <TextBlock Text="ISBL Check 3.0.0 | Directum 5.8" FontSize="11"/>
         </StatusBarItem>
       </StatusBar>
     </Grid>
   </xctk:BusyIndicator>
 </Window>
+

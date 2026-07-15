@@ -1,4 +1,6 @@
-using IsblCheck.Core.Checker;
+﻿using IsblCheck.Core.Checker;
+using System.Collections.Generic;
+using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Variables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,7 +15,7 @@ namespace IsblCheck.BaseRules.Tests.Variables
     [TestMethod]
     public void UndeclaredVariable_ShouldReport()
     {
-      var report = TestHelper.ApplyRule(rule, "x = 3");
+      var report = TestHelper.ApplyRule(rule, "abs(x)");
       TestHelper.AssertSingleMessage(report, "A001", Severity.Error);
     }
 
@@ -35,7 +37,8 @@ namespace IsblCheck.BaseRules.Tests.Variables
     public void VariableInForeach_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "foreach x in arr do\nabs(x)\nendforeach");
+        "foreach x in arr\nabs(x)\nendforeach",
+        contextVariables: new List<string> { "ARR" });
       TestHelper.AssertNoMessages(report);
     }
 
@@ -50,7 +53,7 @@ namespace IsblCheck.BaseRules.Tests.Variables
     public void ContextVariable_NoReport()
     {
       var report = TestHelper.ApplyRule(rule, "abs(param1)",
-        contextVariables: new System.Collections.Generic.List<string> { "PARAM1" });
+        contextVariables: new List<string> { "PARAM1" });
       TestHelper.AssertNoMessages(report);
     }
   }

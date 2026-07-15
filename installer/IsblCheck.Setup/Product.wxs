@@ -1,35 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
-  <!-- Путь до бинарников, из которых будет собираться инсталлятор. -->
+  <!-- РџСѓС‚СЊ РґРѕ Р±РёРЅР°СЂРЅРёРєРѕРІ, РёР· РєРѕС‚РѕСЂС‹С… Р±СѓРґРµС‚ СЃРѕР±РёСЂР°С‚СЊСЃСЏ РёРЅСЃС‚Р°Р»Р»СЏС‚РѕСЂ. -->
   <?define ArtifactsDir = "$(var.ProjectDir)..\..\artifacts\bin\IsblCheck\Release\" ?>
-  <!-- Имя продукта. -->
+  <!-- РРјСЏ РїСЂРѕРґСѓРєС‚Р°. -->
   <?define ProductName = "IsblCheck" ?>
 
-  <Product Id="*" Name="IsblCheck" Language="1033" Version="2.8.0.0" Manufacturer="NPO Computer" UpgradeCode="cfe1f3ed-8306-4e23-955a-1226c2defe70">
+  <Product Id="*" Name="IsblCheck" Language="1033" Version="3.0.0.0" Manufacturer="NPO Computer" UpgradeCode="cfe1f3ed-8306-4e23-955a-1226c2defe70">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />
     <MediaTemplate EmbedCab="yes"/>
 
     <Feature Id="IsblCheck" Title="IsblCheck.Setup" Level="1">
-      <!-- Бинарники. -->
+      <!-- Р‘РёРЅР°СЂРЅРёРєРё. -->
       <ComponentGroupRef Id="Binaries" />
-      <!-- Сборки с правилами. -->
+      <!-- РЎР±РѕСЂРєРё СЃ РїСЂР°РІРёР»Р°РјРё. -->
       <ComponentGroupRef Id="Rules" />
-      <!-- Ярлыки в главном меню. -->
+      <!-- РЇСЂР»С‹РєРё РІ РіР»Р°РІРЅРѕРј РјРµРЅСЋ. -->
       <ComponentRef Id="ApplicationShortcuts" />
     </Feature>
 
     <Icon Id="Icon.exe" SourceFile="$(var.ArtifactsDir)IsblCheck.ico" />    
     <Property Id="ARPPRODUCTICON" Value="Icon.exe" />
     
-    <!-- Без возможности восстановить -->
+    <!-- Р‘РµР· РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ -->
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
-    <!-- Без возможности изменить -->
+    <!-- Р‘РµР· РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РёР·РјРµРЅРёС‚СЊ -->
     <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
 
-    <!-- Структура папок. -->
+    <!-- РЎС‚СЂСѓРєС‚СѓСЂР° РїР°РїРѕРє. -->
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
@@ -41,9 +41,9 @@
       </Directory>
     </Directory>
 
-    <!-- Компоненты. -->
+    <!-- РљРѕРјРїРѕРЅРµРЅС‚С‹. -->
     
-    <!-- Бинарники. -->
+    <!-- Р‘РёРЅР°СЂРЅРёРєРё. -->
     <ComponentGroup Id="Binaries" Directory="INSTALLDIR">
       <Component Id="Antlr4.Runtime.dll" Guid="*">
         <File Id="Antlr4.Runtime.dll" Source="$(var.ArtifactsDir)Antlr4.Runtime.dll" KeyPath="yes" Checksum="yes"/>
@@ -125,23 +125,23 @@
       </Component>
     </ComponentGroup>
 
-    <!-- Правила анализатора. -->
+    <!-- РџСЂР°РІРёР»Р° Р°РЅР°Р»РёР·Р°С‚РѕСЂР°. -->
     <ComponentGroup Id="Rules" Directory="RulesDir">
       <Component Id="IsblCheck.BaseRules.dll" Guid="*">
         <File Id="IsblCheck.BaseRules.dll" Source="$(var.ArtifactsDir)Rules\IsblCheck.BaseRules.dll" KeyPath="yes" Checksum="yes"/>
       </Component>
     </ComponentGroup>
 
-    <!-- Ярлыки в главном меню. -->
+    <!-- РЇСЂР»С‹РєРё РІ РіР»Р°РІРЅРѕРј РјРµРЅСЋ. -->
     <Component Id="ApplicationShortcuts" Guid="*" Directory="ApplicationProgramsFolder">
-      <!-- Ярлык для запуска. -->
+      <!-- РЇСЂР»С‹Рє РґР»СЏ Р·Р°РїСѓСЃРєР°. -->
       <Shortcut Id="ApplicationStartMenuShortcut"
                 Name="$(var.ProductName)"
                 Description="$(var.ProductName)"
                 Target="[#IsblCheck.exe]"
                 WorkingDirectory="INSTALLDIR"
                 Directory="ApplicationProgramsFolder"/>
-      <!-- Ярлык для удаления. -->
+      <!-- РЇСЂР»С‹Рє РґР»СЏ СѓРґР°Р»РµРЅРёСЏ. -->
       <Shortcut Id="UninstallProduct"
                 Name="Uninstall $(var.ProductName)"
                 Description="Uninstalls $(var.ProductName)"
@@ -153,3 +153,4 @@
     </Component>
   </Product>
 </Wix>
+

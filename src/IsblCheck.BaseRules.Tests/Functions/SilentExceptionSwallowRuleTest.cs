@@ -1,4 +1,4 @@
-using IsblCheck.Core.Checker;
+﻿using IsblCheck.Core.Checker;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

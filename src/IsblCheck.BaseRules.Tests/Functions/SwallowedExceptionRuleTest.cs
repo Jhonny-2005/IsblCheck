@@ -1,4 +1,4 @@
-using IsblCheck.Core.Checker;
+﻿using IsblCheck.Core.Checker;
 using System.Linq;
 using IsblCheck.Core.Reports;
 using IsblCheck.BaseRules.Functions;
@@ -23,7 +23,7 @@ namespace IsblCheck.BaseRules.Tests.Functions
     public void ExceptionSwallowed_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "try\nx = 1\nexcept\nFreeException()\nendexcept");
+        "try\nx = 1\nexcept\nExceptionExists()\nendexcept");
       Assert.IsTrue(report.Messages.Count() > 0, "Expected swallowed exception info");
     }
 

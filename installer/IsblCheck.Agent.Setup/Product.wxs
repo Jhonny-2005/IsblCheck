@@ -1,30 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   
-  <!-- Путь до бинарников, из которых будет собираться инсталлятор. -->
+  <!-- РџСѓС‚СЊ РґРѕ Р±РёРЅР°СЂРЅРёРєРѕРІ, РёР· РєРѕС‚РѕСЂС‹С… Р±СѓРґРµС‚ СЃРѕР±РёСЂР°С‚СЊСЃСЏ РёРЅСЃС‚Р°Р»Р»СЏС‚РѕСЂ. -->
   <?define ArtifactsDir = "$(var.ProjectDir)..\..\artifacts\bin\IsblCheck.Agent\Release\" ?>
-  <!-- Имя продукта. -->
+  <!-- РРјСЏ РїСЂРѕРґСѓРєС‚Р°. -->
   <?define ProductName = "IsblCheck Agent" ?>
 
-  <Product Id="*" Name="$(var.ProductName)" Language="1033" Version="2.8.0.0" Manufacturer="NPO Computer" UpgradeCode="5d5977b3-85d7-492e-a27c-0366afa42c29">
+  <Product Id="*" Name="$(var.ProductName)" Language="1033" Version="3.0.0.0" Manufacturer="NPO Computer" UpgradeCode="5d5977b3-85d7-492e-a27c-0366afa42c29">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />
     <MediaTemplate EmbedCab="yes"/>
 
     <Feature Id="ProductFeature" Title="IsblCheck.Agent" Level="1">
-      <!-- Бинарники. -->
+      <!-- Р‘РёРЅР°СЂРЅРёРєРё. -->
       <ComponentGroupRef Id="Binaries" />
-      <!-- Сборки с правилами. -->
+      <!-- РЎР±РѕСЂРєРё СЃ РїСЂР°РІРёР»Р°РјРё. -->
       <ComponentGroupRef Id="Rules" />
     </Feature>
     
-    <!-- Без возможности восстановить -->
+    <!-- Р‘РµР· РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ -->
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
-    <!-- Без возможности изменить -->
+    <!-- Р‘РµР· РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РёР·РјРµРЅРёС‚СЊ -->
     <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
 
-    <!-- Структура папок. -->
+    <!-- РЎС‚СЂСѓРєС‚СѓСЂР° РїР°РїРѕРє. -->
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
@@ -33,7 +33,7 @@
       </Directory>
     </Directory>
 
-    <!-- Компоненты. -->
+    <!-- РљРѕРјРїРѕРЅРµРЅС‚С‹. -->
     <ComponentGroup Id="Binaries" Directory="INSTALLDIR">
       <Component Id="IsblCheck.Agent.exe" Guid="*">
         <File Id="IsblCheck.Agent.exe" Source="$(var.ArtifactsDir)IsblCheck.Agent.exe" KeyPath="yes" Checksum="yes"/>
@@ -76,3 +76,4 @@
     </ComponentGroup>
   </Product>
 </Wix>
+

@@ -6,31 +6,31 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace IsblCheck.BaseRules.Tests.Functions
 {
   [TestClass]
-  public class NumericStringComparisonRuleTest
+  public class MissingUnlockAfterLockRuleTest
   {
-    private readonly NumericStringComparisonRule rule = new NumericStringComparisonRule();
+    private readonly MissingUnlockAfterLockRule rule = new MissingUnlockAfterLockRule();
 
     [TestMethod]
-    public void StringCompareOnNumber_ShouldReport()
+    public void LockWithoutUnlock_ShouldReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x == 5\nabs(x)\nendif");
-      TestHelper.AssertSingleMessage(report, "F050", Severity.Warning);
+        "Doc.Lock()");
+      TestHelper.AssertSingleMessage(report, "F055", Severity.Warning);
     }
 
     [TestMethod]
-    public void NumericCompare_NoReport()
+    public void LockWithUnlock_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x = 5\nabs(x)\nendif");
+        "Doc.Lock()\nDoc.Unlock()");
       TestHelper.AssertNoMessages(report);
     }
 
     [TestMethod]
-    public void NumericNotEqual_NoReport()
+    public void NoLock_NoReport()
     {
       var report = TestHelper.ApplyRule(rule,
-        "if x <> 5\nabs(x)\nendif");
+        "abs(x)");
       TestHelper.AssertNoMessages(report);
     }
   }

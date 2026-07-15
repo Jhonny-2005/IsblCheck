@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -80,6 +80,10 @@
     <Compile Include="Functions\NumericStringComparisonRuleTest.cs" />
     <Compile Include="Functions\LargeReferenceOnServerRuleTest.cs" />
     <Compile Include="Functions\NamedExceptionForRetryRuleTest.cs" />
+    <Compile Include="Functions\ModifyCollectionDuringIterationRuleTest.cs" />
+    <Compile Include="Functions\MissingTryEditBeforeLockRuleTest.cs" />
+    <Compile Include="Functions\MissingUnlockAfterLockRuleTest.cs" />
+    <Compile Include="Functions\FullReferenceLoadOnServerRuleTest.cs" />
     <Compile Include="Functions\LargeParameterCountRuleTest.cs" />
     <Compile Include="Functions\InteractiveWindowsOnEventsTest.cs" />
     <Compile Include="Functions\SingleFormatArgumentRuleTest.cs" />
@@ -91,13 +95,17 @@
     <Compile Include="Security\ShellExecRuleTest.cs" />
     <Compile Include="Security\RegWriteRuleTest.cs" />
     <Compile Include="Security\ExecuteInServerEventsRuleTest.cs" />
+    <Compile Include="Security\FileSystemAccessInServerEventsRuleTest.cs" />
+    <Compile Include="Security\NetworkRequestInServerEventsRuleTest.cs" />
+    <Compile Include="Security\HardcodedConnectionStringRuleTest.cs" />
+    
     <Compile Include="ObjectModel\UsingInfoReferenceRuleTest.cs" />
     <Compile Include="ObjectModel\RecoveryObjectStateRuleTest.cs" />
     <Compile Include="Other\TodoDoneCommentsRuleTest.cs" />
     <Compile Include="Other\EmptyCatchBlockRuleTest.cs" />
     <Compile Include="Other\DeepNestingRuleTest.cs" />
     <Compile Include="Other\UnconditionalExitForRuleTest.cs" />
-    <Compile Include="Other\DeprecatedEventVariableRuleTest.cs" />
+    <Compile Include="Other\CommentedCodeBlockRuleTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
