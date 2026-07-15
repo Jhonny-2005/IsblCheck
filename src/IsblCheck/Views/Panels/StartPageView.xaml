@@ -3,102 +3,64 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:c="clr-namespace:IsblCheck.UI.Controls"
-             xmlns:l="clr-namespace:IsblCheck.UI.Localization"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="400"
-             Background="#F3F3F3">
-
-  <UserControl.Resources>
-    <c:DataContextProxy x:Key="DataContextProxy" DataContext="{Binding}"/>
-  </UserControl.Resources>
-
-  <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="32,24">
-
+             d:DesignHeight="300" d:DesignWidth="300">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="24,24" MaxWidth="800" HorizontalAlignment="Center">
+      
       <!-- Header -->
-      <TextBlock Text="ISBL Check"
-                 FontSize="28" FontWeight="Light"
-                 Foreground="#1B1B1B" Margin="0,0,0,4"/>
-      <TextBlock Text="РЎС‚Р°С‚РёС‡РµСЃРєРёР№ Р°РЅР°Р»РёР·Р°С‚РѕСЂ РєРѕРґР° ISBL РґР»СЏ Directum 5.8"
-                 FontSize="14" Foreground="#616161" Margin="0,0,0,24"/>
+      <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,0,0,16">
+        <StackPanel>
+          <TextBlock Text="ISBL Check" FontSize="28" FontWeight="Bold" Foreground="#005A9E" HorizontalAlignment="Center"/>
+          <TextBlock Text="Статический анализатор кода ISBL для Directum 5.8" FontSize="14" Foreground="#666666" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+        </StackPanel>
+      </Border>
 
       <!-- Quick Actions -->
-      <TextBlock Text="Р‘Р«РЎРўР Р«Р™ РЎРўРђР Рў"
-                 FontSize="12" FontWeight="SemiBold" Foreground="#616161"
-                 Margin="0,0,0,12"/>
-
-      <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="20" Margin="0,0,0,16">
+      <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
         <StackPanel>
-          <TextBlock Text="РћС‚РєСЂС‹С‚СЊ РїР°РєРµС‚ СЂР°Р·СЂР°Р±РѕС‚РєРё ISX" FontSize="14" Margin="0,0,0,10">
-            <TextBlock.Style>
-              <Style TargetType="TextBlock">
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Border}}" Value="True">
-                    <Setter Property="Foreground" Value="#0078D4"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </TextBlock.Style>
-          </TextBlock>
-
-          <TextBlock>
-            <Hyperlink Command="{Binding OpenPackageCommand, Mode=OneWay}"
-                       Style="{StaticResource ModernHyperlink}">
-              <Run Text="РћС‚РєСЂС‹С‚СЊ РїР°РєРµС‚..." FontSize="14"/>
-            </Hyperlink>
-          </TextBlock>
-          <TextBlock Margin="0,6,0,0">
-            <Hyperlink Command="{Binding OpenDatabaseCommand, Mode=OneWay}"
-                       Style="{StaticResource ModernHyperlink}">
-              <Run Text="РџРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…..." FontSize="14"/>
-            </Hyperlink>
-          </TextBlock>
-          <TextBlock Margin="0,6,0,0">
-            <Hyperlink Command="{Binding OpenFolderCommand, Mode=OneWay}"
-                       Style="{StaticResource ModernHyperlink}">
-              <Run Text="РћС‚РєСЂС‹С‚СЊ РїР°РїРєСѓ СЃ СЂР°Р·СЂР°Р±РѕС‚РєРѕР№..." FontSize="14"/>
-            </Hyperlink>
-          </TextBlock>
+          <TextBlock Text="БЫСТРЫЙ СТАРТ" FontSize="12" FontWeight="Bold" Foreground="#005A9E" Margin="0,0,0,12"/>
+          
+          <Button Command="{Binding OpenPackageCommand}" HorizontalAlignment="Stretch" Padding="12,8" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+              <Image Source="/Resources/AddPackage_16.png" Width="16" Height="16" VerticalAlignment="Center"/>
+              <TextBlock Text="Открыть пакет разработки ISX" FontSize="14" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          
+          <Button Command="{Binding OpenDatabaseCommand}" HorizontalAlignment="Stretch" Padding="12,8" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+              <Image Source="/Resources/AddDatabase_16.png" Width="16" Height="16" VerticalAlignment="Center"/>
+              <TextBlock Text="Подключиться к базе данных..." FontSize="14" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          
+          <Button Command="{Binding OpenFolderCommand}" HorizontalAlignment="Stretch" Padding="12,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+              <Image Source="/Resources/AddFolder_16.png" Width="16" Height="16" VerticalAlignment="Center"/>
+              <TextBlock Text="Открыть папку с разработкой..." FontSize="14" Margin="8,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
         </StackPanel>
       </Border>
 
       <!-- Recent Files -->
-      <TextBlock Text="РќР•Р”РђР’РќРР• РџР РћР•РљРўР«"
-                 FontSize="12" FontWeight="SemiBold" Foreground="#616161"
-                 Margin="0,8,0,12"/>
-
       <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,16">
-        <ItemsControl ItemsSource="{Binding LastOpenedPackagesView, Mode=OneWay}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <TextBlock>
-                <Hyperlink Command="{Binding DataContext.OpenSpecifiedPackageCommand, Source={StaticResource DataContextProxy}}"
-                           CommandParameter="{Binding Mode=OneWay}"
-                           Style="{StaticResource ModernHyperlink}">
-                  <Run Text="{Binding Mode=OneWay}" FontSize="13"/>
-                </Hyperlink>
-              </TextBlock>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-          <ItemsControl.ItemContainerStyle>
-            <Style TargetType="ContentPresenter">
-              <Setter Property="Margin" Value="0,0,0,2"/>
-            </Style>
-          </ItemsControl.ItemContainerStyle>
-        </ItemsControl>
+        <StackPanel>
+          <TextBlock Text="НЕДАВНИЕ ПРОЕКТЫ" FontSize="12" FontWeight="Bold" Foreground="#005A9E" Margin="0,0,0,8"/>
+          <TextBlock Text="{Binding RecentFilesMessage}" FontSize="12" Foreground="#999999" TextWrapping="Wrap"/>
+        </StackPanel>
       </Border>
 
       <!-- Version Info -->
       <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="16">
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Р’РµСЂСЃРёСЏ 2.8.0 | Directum 5.8" FontSize="12" Foreground="#A0A0A0"/>
+          <TextBlock Text="Версия 3.0.5 | Directum 5.8" FontSize="12" Foreground="#A0A0A0"/>
           <TextBlock Text=" | " FontSize="12" Foreground="#D0D0D0"/>
-          <TextBlock Text="53 РїСЂР°РІРёР»Р° Р°РЅР°Р»РёР·Р°" FontSize="12" Foreground="#A0A0A0"/>
+          <TextBlock Text="61 правила анализа" FontSize="12" Foreground="#A0A0A0"/>
         </StackPanel>
       </Border>
 
     </StackPanel>
   </ScrollViewer>
 </UserControl>
-
