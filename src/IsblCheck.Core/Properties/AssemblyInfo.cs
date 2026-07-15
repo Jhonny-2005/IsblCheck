@@ -1,13 +1,12 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("IsblCheck.Core")]
-[assembly: AssemblyDescription("IsblCheck.Core")]
+[assembly: AssemblyTitle("ISBL Check Core - Ядро анализатора")]
+[assembly: AssemblyDescription("Ядро статического анализатора ISBL-кода. Парсер, правила, контекст.")]
+[assembly: AssemblyCompany("Компания DIRECTUM")]
+[assembly: AssemblyProduct("ISBL Check Core")]
+[assembly: AssemblyCopyright("Copyright (c) Компания DIRECTUM 2018-2026")]
+[assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
-
-[assembly: InternalsVisibleTo("IsblCheck.Core.Tests")]
-[assembly: InternalsVisibleTo("IsblCheck.BaseRules.Tests")]
-
-[assembly: AssemblyVersion("1.0.0.1000")]
-[assembly: AssemblyFileVersion("1.0.0.1000")]
+[assembly: AssemblyVersion("3.0.1.0")]
+[assembly: AssemblyFileVersion("3.0.1.0")]

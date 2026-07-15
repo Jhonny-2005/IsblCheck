@@ -1,9 +1,12 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("IsblCheck.Agent")]
-[assembly: AssemblyDescription("IsblCheck.Agent")]
+[assembly: AssemblyTitle("ISBL Check Agent - Консольный агент")]
+[assembly: AssemblyDescription("Консольный агент для проверки ISBL-кода в невизуальном режиме.")]
+[assembly: AssemblyCompany("Компания DIRECTUM")]
+[assembly: AssemblyProduct("ISBL Check Agent")]
+[assembly: AssemblyCopyright("Copyright (c) Компания DIRECTUM 2018-2026")]
+[assembly: AssemblyTrademark("")]
 [assembly: ComVisible(false)]
-
-[assembly: AssemblyVersion("1.0.0.1000")]
-[assembly: AssemblyFileVersion("1.0.0.1000")]
+[assembly: AssemblyVersion("3.0.1.0")]
+[assembly: AssemblyFileVersion("3.0.1.0")]
