@@ -99,19 +99,19 @@
         <MenuItem Header="{l:Localization FILE}" Padding="12,6">
           <MenuItem Header="{l:Localization OPEN}" Padding="12,4">
             <MenuItem Header="{l:Localization OPEN_PACKAGE}"
-                    Command="{Binding OpenPackageCommand, Mode=OneWay}" Padding="12,4">
+                    Command="{Binding OpenPackageCommand, Mode=OneTime}" Padding="12,4">
               <MenuItem.Icon>
                 <Image Source="/Resources/AddPackage_16.png"/>
               </MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="{l:Localization OPEN_DATABASE}"
-                    Command="{Binding OpenDatabaseCommand, Mode=OneWay}" Padding="12,4">
+                    Command="{Binding OpenDatabaseCommand, Mode=OneTime}" Padding="12,4">
               <MenuItem.Icon>
                 <Image Source="/Resources/AddDatabase_16.png"/>
               </MenuItem.Icon>
             </MenuItem>
             <MenuItem Header="{l:Localization OPEN_FOLDER}"
-                    Command="{Binding OpenFolderCommand, Mode=OneWay}" Padding="12,4">
+                    Command="{Binding OpenFolderCommand, Mode=OneTime}" Padding="12,4">
               <MenuItem.Icon>
                 <Image Source="/Resources/AddFolder_16.png"/>
               </MenuItem.Icon>
@@ -143,21 +143,21 @@
                 ToolTip="{l:Localization OPEN_PACKAGE}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/AddPackage_20.png" Width="16" Height="16"/>
-              <TextBlock Text="РџР°РєРµС‚" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="Пакет" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Command="{Binding OpenDatabaseCommand, Mode=OneTime}"
                 ToolTip="{l:Localization OPEN_DATABASE}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/AddDatabase_20.png" Width="16" Height="16"/>
-              <TextBlock Text="Р‘Р”" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="БД" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Command="{Binding OpenFolderCommand, Mode=OneTime}"
                 ToolTip="{l:Localization OPEN_FOLDER}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/AddFolder_20.png" Width="16" Height="16"/>
-              <TextBlock Text="РџР°РїРєР°" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="Папка" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Separator/>
@@ -165,14 +165,14 @@
                 ToolTip="{l:Localization CHECK_ACTIVE_TAB}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/Check_20.png" Width="16" Height="16"/>
-              <TextBlock Text="РџСЂРѕРІРµСЂРёС‚СЊ" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="Проверить" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
           <Button Command="{Binding CheckAllCommand, Mode=OneTime}"
                 ToolTip="{l:Localization CHECK_OPENED_TABS}">
             <StackPanel Orientation="Horizontal">
               <Image Source="/Resources/CheckAll_20.png" Width="16" Height="16"/>
-              <TextBlock Text="РџСЂРѕРІРµСЂРёС‚СЊ РІСЃС‘" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="Проверить все" Margin="6,0,0,0" FontSize="12" VerticalAlignment="Center"/>
             </StackPanel>
           </Button>
         </ToolBar>
@@ -216,4 +216,3 @@
     </Grid>
   </xctk:BusyIndicator>
 </Window>
-
