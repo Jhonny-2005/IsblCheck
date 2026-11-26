@@ -1,4 +1,4 @@
-﻿<Window x:Class="IsblCheck.Views.PanelContainerWindow"
+<Window x:Class="IsblCheck.Views.PanelContainerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,13 +11,21 @@
         xmlns:vmp="clr-namespace:IsblCheck.ViewModels.Panels"
         xmlns:vp="clr-namespace:IsblCheck.Views.Panels"
         mc:Ignorable="d"
-        Icon="/Resources/App.ico" Height="768" Width="1024"
+        Style="{StaticResource {x:Type Window}}" Language="ru-RU"
+        Icon="/Resources/App.ico" Height="780" Width="1200" MinWidth="640" MinHeight="360" WindowStartupLocation="CenterScreen"
         Title="{l:Localization WINDOWS_TITLE}" 
         ResizeMode="CanResizeWithGrip">
   <Window.Resources>
     <ad:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.MenuBrushKey}" Color="#1D2838"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.MenuTextBrushKey}" Color="#E5ECF7"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#405273"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFF"/>
 
-    <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+    <Style x:Key="ToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+      <Setter Property="Padding" Value="9,7"/>
+      <Setter Property="Margin" Value="2"/>
       <Style.Triggers>
         <Trigger Property="IsEnabled" Value="False">
           <Setter Property="Opacity" Value="0.5"/>
@@ -96,7 +104,7 @@
   <xctk:BusyIndicator Name="BusyIndicator"
                       IsBusy="{Binding IsBusyIndicatorVisible, Mode=OneWay}"
                       BusyContent="{Binding BusyIndicatorCaption, Mode=OneWay, TargetNullValue={l:Localization BUSY_INDICATOR_DEFAULT_CAPTION}}">
-    <Grid>
+    <Grid Background="{StaticResource CanvasBrush}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="Auto"/>
@@ -105,9 +113,9 @@
       </Grid.RowDefinitions>
 
       <!-- Главное меню. -->
-      <Menu Grid.Row="0">
+      <Menu Grid.Row="0" Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource InkBrush}" Padding="16,8">
         <MenuItem Header="{l:Localization FILE}">
-          <MenuItem Header="{l:Localization OPEN}">
+          <MenuItem Header="{l:Localization OPEN}"><MenuItem Header="Выгрузка маршрутов XML/DAT..." Command="{Binding OpenRouteExportCommand}"/>
             <MenuItem Header="{l:Localization OPEN_PACKAGE}"
                     Command="{Binding OpenPackageCommand, Mode=OneWay}">
               <MenuItem.Icon>
@@ -138,6 +146,7 @@
           <MenuItem Header="{l:Localization START_PAGE}"
                   Command="{Binding ShowStartPageCommand, Mode=OneTime}"/>
         </MenuItem>
+        <MenuItem Header="Настройки"><MenuItem Header="Подключение и анализ ИИ..." Click="AiSettingsClick"/><Separator/><MenuItem Header="Подсказки о числовых литералах" IsCheckable="True" IsChecked="{Binding IncludeNumericHints, Mode=TwoWay}" ToolTip="Необязательные подсказки о читаемости; числовые литералы не являются ошибками ISBL. Настройка действует для последующих проверок."/></MenuItem>
         <!-- TODO: Надо доделать. -->
         <!--<MenuItem Header="{l:Localization OPTIONS}">
         <MenuItem Header="{l:Localization SETTINGS}"/>
@@ -149,99 +158,89 @@
       </Menu>
 
       <!-- Панель кнопок. -->
-      <ToolBarTray Grid.Row="1">
-        <ToolBar DataContext="{Binding StandardToolbar, Mode=OneTime}">
+      <WrapPanel Grid.Row="1" Background="{StaticResource CanvasBrush}" Margin="9,4" DataContext="{Binding StandardToolbar, Mode=OneTime}">
           <Button Command="{Binding OpenPackageCommand, Mode=OneTime}"
                 Style="{StaticResource ToolbarButtonStyle}"
                 ToolTip="{l:Localization OPEN_PACKAGE}">
-            <Image Source="/Resources/AddPackage_20.png"/>
+            <TextBlock Text="Открыть ISX"/>
           </Button>
           <Button Command="{Binding OpenDatabaseCommand, Mode=OneTime}"
                 Style="{StaticResource ToolbarButtonStyle}"
                 ToolTip="{l:Localization OPEN_DATABASE}">
-            <Image Source="/Resources/AddDatabase_20.png"/>
+            <TextBlock Text="База данных"/>
           </Button>
           <Button Command="{Binding OpenFolderCommand, Mode=OneTime}"
                 Style="{StaticResource ToolbarButtonStyle}"
                 ToolTip="{l:Localization OPEN_FOLDER}">
-            <Image Source="/Resources/AddFolder_20.png"/>
+            <TextBlock Text="Папка"/>
           </Button>
-          <Separator/>
+          <Button Command="{Binding OpenRouteExportCommand}" Style="{StaticResource ToolbarButtonStyle}" ToolTip="Открыть выгрузку маршрутов Directum"><TextBlock Text="Маршруты XML"/></Button>
           <Button Command="{Binding CheckCommand, Mode=OneTime}"
                 Style="{StaticResource ToolbarButtonStyle}"
                 ToolTip="{l:Localization CHECK_ACTIVE_TAB}">
-            <Image Source="/Resources/Check_20.png"/>
+            <TextBlock Text="▶  Проверить" FontWeight="SemiBold"/>
           </Button>
           <Button Command="{Binding CheckAllCommand, Mode=OneTime}"
                 Style="{StaticResource ToolbarButtonStyle}"
                 ToolTip="{l:Localization CHECK_OPENED_TABS}">
-            <Image Source="/Resources/CheckAll_20.png"/>
+            <TextBlock Text="Все вкладки"/>
           </Button>
-        </ToolBar>
-      </ToolBarTray>
+      </WrapPanel>
 
       <!-- Док панель.-->
-      <ad:DockingManager x:Name="DockingManager" Grid.Row="2"
+      <ad:DockingManager x:Name="DockingManager" Grid.Row="2" Margin="12,0,12,10"
                        DocumentsSource="{Binding Panels, Mode=OneTime}"
                        AnchorablesSource="{Binding AnchorablePanels, Mode=OneTime}"
                        LayoutItemContainerStyleSelector="{StaticResource PanelStyleSelector}"
                        LayoutItemTemplateSelector="{StaticResource PanelTemplateSelector}">
+        <ad:DockingManager.Resources>
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#1D2838"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlLightBrushKey}" Color="#39475C"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlLightLightBrushKey}" Color="#39475C"/>
+    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#101722"/>
+    <SolidColorBrush x:Key="AvalonDock_ThemeMetro_BaseColor1" Color="#101722"/>
+    <SolidColorBrush x:Key="AvalonDock_ThemeMetro_BaseColor2" Color="#E5ECF7"/>
+    <SolidColorBrush x:Key="AvalonDock_ThemeMetro_BaseColor3" Color="#A9B8FF"/>
+    <SolidColorBrush x:Key="AvalonDock_ThemeMetro_BaseColor4" Color="#6679C6"/>
+    <SolidColorBrush x:Key="AvalonDock_ThemeMetro_BaseColor5" Color="#D7E0EF"/>
+    <SolidColorBrush x:Key="AvalonDock_ThemeMetro_BaseColor6" Color="#52647D"/>
+    <SolidColorBrush x:Key="AvalonDock_ThemeMetro_BaseColor7" Color="#1D2838"/>
+        </ad:DockingManager.Resources>
+        <ad:DockingManager.DocumentHeaderTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Title}" ToolTip="{Binding Title}"
+                       MaxWidth="156" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+          </DataTemplate>
+        </ad:DockingManager.DocumentHeaderTemplate>
         <ad:DockingManager.Theme>
-          <ad:AeroTheme/>
+          <ad:MetroTheme/>
         </ad:DockingManager.Theme>
 
         <ad:LayoutRoot>
           <ad:LayoutPanel Orientation="Horizontal">
-            <ad:LayoutAnchorablePane DockWidth="250"/>
+            <ad:LayoutAnchorablePane DockWidth="280"/>
             <ad:LayoutDocumentPane/>
           </ad:LayoutPanel>
         </ad:LayoutRoot>
       </ad:DockingManager>
 
       <!-- Статус. -->
-      <StatusBar Grid.Row="3" Height="20">
-        <StatusBar.ItemsPanel>
-          <ItemsPanelTemplate>
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="20"/>
-              </Grid.ColumnDefinitions>
-            </Grid>
-          </ItemsPanelTemplate>
-        </StatusBar.ItemsPanel>
-        <StatusBarItem Grid.Column="0"
-                     HorizontalContentAlignment="Stretch"
-                     VerticalContentAlignment="Stretch">
-          <ProgressBar Minimum="0"
-                     Maximum="{Binding ProgressMaximum, Mode=OneWay}"
-                     Value="{Binding ProgressValue, Mode=OneWay}"
-                     Visibility="{Binding IsProgressVisible, Mode=OneWay,
-                                          Converter={StaticResource BoolToVisibilityConverter},
-                                          ConverterParameter={x:Static Visibility.Hidden}}"/>
-        </StatusBarItem>
-        <Separator Grid.Column="1"/>
-        <!-- TODO: Надо доделать. -->
-        <!--<StatusBarItem Grid.Column="2">
-        <StackPanel>
-          <TextBlock Text="Длина, количество строк"/>
-          <Separator/>
-        </StackPanel>
-      </StatusBarItem>
-      <Separator Grid.Column="3"/>
-      <StatusBarItem Grid.Column="4">
-        <StackPanel>
-          <TextBlock Text="Строка, столбец, выделено"/>
-          <Separator/>
-        </StackPanel>
-      </StatusBarItem>
-      <Separator Grid.Column="5"/>-->
-      </StatusBar>
+      <Grid Grid.Row="3" MinHeight="28" Background="{StaticResource SurfaceBrush}">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="2*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <ProgressBar Grid.Column="0" Minimum="0" Height="6" Margin="12,0,8,0"
+                     Maximum="{Binding ProgressMaximum}" Value="{Binding ProgressValue}"
+                     Visibility="{Binding IsProgressVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <TextBlock Grid.Column="1" Text="{Binding AiStatus}" ToolTip="{Binding AiStatus}"
+                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="6,0"
+                   Visibility="{Binding IsAiRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <Button Grid.Column="2" Content="Отменить ИИ" Command="{Binding CancelAiReviewCommand}"
+                Padding="8,4" Margin="2,2,18,2" ToolTip="Прервать запросы к модели"
+                Visibility="{Binding IsAiRunning, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+      </Grid>
     </Grid>
   </xctk:BusyIndicator>
 </Window>

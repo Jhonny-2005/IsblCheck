@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using IsblCheck.Common.Patterns;
 
 namespace IsblCheck.Common.Settings

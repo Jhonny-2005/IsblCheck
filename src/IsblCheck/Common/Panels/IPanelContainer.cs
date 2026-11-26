@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using IsblCheck.Common.Windows;
 
 namespace IsblCheck.Common.Panels

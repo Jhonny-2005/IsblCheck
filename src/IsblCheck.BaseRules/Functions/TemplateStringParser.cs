@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using IsblCheck.Core.Reports;
@@ -47,6 +47,7 @@ namespace IsblCheck.BaseRules.Functions
     /// </summary>
     public void Parse()
     {
+      this.FormatItems.Clear();
       var matches = FormatArgRegex.Matches(templateString);
       var currentArgIndex = -1;
       var currentLine = 0;
@@ -59,11 +60,12 @@ namespace IsblCheck.BaseRules.Functions
         {
           if (match.Groups["index"].Value != string.Empty)
           {
-            currentArgIndex = int.Parse(match.Groups["index"].Value);
+            if (!int.TryParse(match.Groups["index"].Value, out currentArgIndex))
+              currentArgIndex = int.MaxValue; // Out of range for any argument array, but never crash the rule.
           }
           else
           {
-            currentArgIndex++;
+            if (currentArgIndex < int.MaxValue) currentArgIndex++;
           }
           for (var j = lastMatchPos; j < match.Index; j++)
           {

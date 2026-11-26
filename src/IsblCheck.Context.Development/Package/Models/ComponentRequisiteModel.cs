@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -20,6 +20,10 @@ namespace IsblCheck.Context.Development.Package.Models
     /// </summary>
     [XmlAttribute("Value")]
     public string Value { get; set; }
+
+    // ISX exports short strings as attributes and Text requisites as base64.
+    [XmlIgnore]
+    public string StringValue => this.Value ?? this.DecodedText;
 
     /// <summary>
     /// Локализованное значение реквизита.

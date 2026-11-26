@@ -1,4 +1,4 @@
-﻿using IsblCheck.Core.Context.Development;
+using IsblCheck.Core.Context.Development;
 
 namespace IsblCheck.Context.Development.Folder.Handlers
 {

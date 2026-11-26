@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Interactivity;
+using System.Windows;
+using Microsoft.Xaml.Behaviors;
 
 namespace IsblCheck.UI.Behaviors
 {

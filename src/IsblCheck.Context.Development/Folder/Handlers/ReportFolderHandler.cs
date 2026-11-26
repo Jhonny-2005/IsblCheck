@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Common.Logging;
+using NLog;
 using IsblCheck.Context.Development.Package.Handlers;
 using IsblCheck.Context.Development.Package.Models;
 using IsblCheck.Core.Context.Development;
@@ -35,7 +35,7 @@ namespace IsblCheck.Context.Development.Folder.Handlers
 
     #region Поля и свойства
 
-    private static readonly ILog log = LogManager.GetLogger<ReportFolderHandler<T>>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     #endregion
 

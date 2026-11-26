@@ -1,4 +1,4 @@
-﻿using Antlr4.Runtime;
+using Antlr4.Runtime;
 
 namespace IsblCheck.Core.Reports
 {

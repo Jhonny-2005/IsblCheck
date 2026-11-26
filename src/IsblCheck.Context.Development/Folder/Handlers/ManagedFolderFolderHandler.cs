@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Antlr4.Runtime.Misc;
-using Common.Logging;
+using NLog;
 using IsblCheck.Context.Development.Folder.Models;
 using IsblCheck.Context.Development.Utils;
 using IsblCheck.Core.Context.Development;
@@ -16,7 +16,7 @@ namespace IsblCheck.Context.Development.Folder.Handlers
   {
     private const string IsSearchFolderRequisiteName = "ДаНет2";
 
-    private static readonly ILog log = LogManager.GetLogger<ManagedFolderFolderHandler>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     #region FolderHandlerBase
 

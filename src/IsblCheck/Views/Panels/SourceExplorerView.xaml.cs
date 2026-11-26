@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Views.Panels
+namespace IsblCheck.Views.Panels
 {
   /// <summary>
   /// Представление панели проводника.

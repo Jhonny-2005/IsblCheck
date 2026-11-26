@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using IsblCheck.BaseRules.Properties;
@@ -56,70 +55,26 @@ namespace IsblCheck.BaseRules.Variables
       /// <param name="context">Контекст.</param>
       public override void EnterAssignStatement([NotNull]IsblParser.AssignStatementContext context)
       {
-        var childCount = context.ChildCount;
-        var builder = new StringBuilder();
-        for (var i = 0; i < childCount; i++)
-        {
-          var child = context.GetChild(i);
-          if (IsEqual(child))
-            break;
-          builder.Append(child.GetText());
-        }
+        // Property getters and setters can have side effects even without arguments.
+        // Only report a plain local variable assignment.
+        if (context.variable() == null || context.typedefinition() != null || context.indexer() != null || context.invocationCall().Length != 0)
+          return;
+        var right = context.expression()?.operand();
+        while (right?.expression() is { } inner)
+          right = inner.operand();
+        if (right?.variable() == null || right.indexer() != null || right.POINTER() != null || right.invocationCall().Length != 0)
+          return;
 
-        var leftExpression = builder.ToString();
-        var rightExpression = context.expression().GetText();
-        if(mainContext.Application.IsExistPredefinedVariable(context.variable().GetText()))
+        var leftExpression = context.variable().GetText();
+        var rightExpression = right.variable().GetText();
+        if (mainContext.Application.IsExistPredefinedVariable(leftExpression))
         {
           leftExpression = leftExpression.Trim('!');
           rightExpression = rightExpression.Trim('!');
         }
 
         if (leftExpression.Equals(rightExpression, StringComparison.OrdinalIgnoreCase))
-        {
-          if (context.typedefinition() == null)
-          {
-            var invCallContexts = context.invocationCall();
-
-            var numberOfInvCalls = invCallContexts.Length;
-            if (numberOfInvCalls > 1)
-            {
-              var requisites = invCallContexts[numberOfInvCalls - 2].identifier().GetText();
-              var value = invCallContexts[numberOfInvCalls - 1].identifier().GetText();
-
-              if (!requisites.Equals("requisites", StringComparison.OrdinalIgnoreCase) ||
-                !(value.Equals("value", StringComparison.OrdinalIgnoreCase) || value.StartsWith("as", StringComparison.OrdinalIgnoreCase)) ||
-                invCallContexts[numberOfInvCalls - 1].parameterList() != null)
-              {
-                this.ContextsWithError.Add(context);
-              }
-            }
-            else
-            {
-              if (numberOfInvCalls == 1)
-              {
-                var name = context.variable().GetText().Trim('!');
-                if ((!name.Equals("object", StringComparison.OrdinalIgnoreCase) &&
-                  !name.Equals("sender", StringComparison.OrdinalIgnoreCase)) ||
-                  invCallContexts[0].parameterList() != null)
-                {
-                  this.ContextsWithError.Add(context);
-                }
-              }
-              else
-                this.ContextsWithError.Add(context);
-            }
-          }
-          else
-            this.ContextsWithError.Add(context);
-        }
-      }
-
-      private static bool IsEqual(IParseTree child)
-      {
-        var eq = child as TerminalNodeImpl;
-        return eq != null &&
-               ((eq.Symbol.Type == IsblParser.EQ) ||
-                (eq.Symbol.Type == IsblParser.COLON));
+          this.ContextsWithError.Add(context);
       }
 
     }
@@ -159,9 +114,12 @@ namespace IsblCheck.BaseRules.Variables
 
       foreach (var contextWithError in listContextesWithError)
       {
-        report.AddWarning(Code,
+        var name = contextWithError.variable().GetText();
+        report.Add(Severity.Warning, Code,
           string.Format(Resources.SelfAssignmentVarRuleDescription, contextWithError.expression().GetText()),
-          document, contextWithError.GetTextPosition());
+          document, contextWithError.GetTextPosition(), new DiagnosticRecommendation(
+            $"Проверьте, какое значение предполагалось записать в «{name}». Если строка лишняя, удалите её после проверки того, что «{name}» уже получает значение на всех нужных путях.",
+            "Выполните ветвь с присваиванием и проверьте значение «" + name + "» в месте следующего использования."));
       }
     }
 

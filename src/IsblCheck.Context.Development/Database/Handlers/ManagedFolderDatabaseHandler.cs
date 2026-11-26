@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using IsblCheck.Context.Development.Utils;
@@ -272,7 +272,7 @@ where
     public string GetManagedFoldersQuery(Version platformVersion)
     {
       var minVersion = MinSupportedPlatformVersion;
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return ManagedFoldersQuery_7_56;
       return null;
     }
@@ -283,7 +283,7 @@ where
     public string GetActionQuery(Version platformVersion)
     {
       var minVersion = MinSupportedPlatformVersion;
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return ActionQuery_7_56;
       return null;
     }
@@ -294,7 +294,7 @@ where
     public string GetMethodsQuery(Version platformVersion)
     {
       var minVersion = MinSupportedPlatformVersion;
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return MethodsQuery_7_56;
       return null;
     }
@@ -305,7 +305,7 @@ where
     public string GetMethodParamsQuery(Version platformVersion)
     {
       var minVersion = MinSupportedPlatformVersion;
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return MethodParamsQuery_7_56;
       return null;
     }

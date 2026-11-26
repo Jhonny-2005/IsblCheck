@@ -1,16 +1,18 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using GalaSoft.MvvmLight.CommandWpf;
+using IsblCheck.Common.Mvvm;
 using IsblCheck.Common.Dialogs;
 using IsblCheck.Common.Localization;
 using IsblCheck.Common.Panels;
 using IsblCheck.Core.Reports;
 using IsblCheck.Reports.Printers;
 using IsblCheck.Services;
+using IsblCheck.Views;
+using System.Windows.Controls;
 
 namespace IsblCheck.ViewModels.Panels
 {
@@ -142,6 +144,25 @@ namespace IsblCheck.ViewModels.Panels
     }
     private ICollectionView reportMessages;
 
+    private string searchText = string.Empty;
+    public string SearchText
+    {
+      get => this.searchText;
+      set
+      {
+        if (this.searchText == value) return;
+        this.searchText = value ?? string.Empty;
+        this.RaisePropertyChanged();
+        this.ReportMessages?.Refresh();
+      }
+    }
+
+    public string EmptyStateText => this.Report == null
+      ? "Результаты появятся после проверки кода."
+      : !this.Report.Messages.Any()
+        ? "Проверка завершена. Замечаний не найдено."
+        : "Нет результатов для выбранных фильтров. Измените поиск или уровень сообщений.";
+
     #endregion
 
     #region Команды
@@ -150,6 +171,14 @@ namespace IsblCheck.ViewModels.Panels
     /// Экспортировать как Csv.
     /// </summary>
     public ICommand ExportAsCsvCommand { get; private set; }
+    public ICommand ExportAsHtmlCommand { get; private set; }
+    public ICommand ReviewWithAiCommand { get; private set; }
+    public ICommand ShowRecommendationCommand { get; private set; }
+    public ICommand ShowAiCommand { get; private set; }
+    private string aiRecommendations;
+    private bool aiBusy;
+    public string NumericHintsStatus => (this.Report as IReportRuleSelection)?.OptionalRulesIncluded switch
+    { true => "F016: вкл.", false => "F016: выкл.", _ => "F016: неизвестно" };
 
     /// <summary>
     /// Команда показа сообещния отчета.
@@ -166,10 +195,15 @@ namespace IsblCheck.ViewModels.Panels
     /// <param name="report">Отчет.</param>
     public void ShowReport(IReport report)
     {
+      if (report == null) throw new ArgumentNullException(nameof(report));
       this.Report = report;
+      this.aiRecommendations = IsblCheck.Services.AiSettings.Get(report);
+      this.RaisePropertyChanged(nameof(NumericHintsStatus));
 
-      this.ReportMessages = CollectionViewSource.GetDefaultView(this.Report.Messages);
+      this.ReportMessages = CollectionViewSource.GetDefaultView(this.Report.Messages.ByImportance().ToList());
       this.ReportMessages.Filter = this.IsReportMessageShow;
+      this.RaisePropertyChanged(nameof(EmptyStateText));
+      CommandManager.InvalidateRequerySuggested();
 
       this.RaisePropertyChanged("ErrorCount");
       this.RaisePropertyChanged("WarningCount");
@@ -214,6 +248,85 @@ namespace IsblCheck.ViewModels.Panels
       this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Information);
     }
 
+    private void ExportAsHtml()
+    {
+      var settings = new SaveFileDialogSettings { AddExtension = true, DefaultExt = ".html", Filter = "HTML (*.html)|*.html", InitialDirectory = Environment.CurrentDirectory, CheckFileExists = false, OverwritePrompt = true };
+      if (this.viewService.ShowSaveFileDialog(PanelManager.Instance.PanelContainer, settings) != true || string.IsNullOrEmpty(settings.FileName)) return;
+      new HtmlReportPrinter(settings.FileName) { AiRecommendations = this.aiRecommendations }.Print(this.Report);
+      this.viewService.ShowMessageBox(LocalizationManager.Instance.LocalizeString("EXPORT_SUCCESS"), icon: MessageBoxImage.Information);
+    }
+
+    private async void ReviewWithAi(IReportMessage selected)
+    {
+      if (this.aiBusy || selected?.Document == null) return;
+      if (!IsblCheck.Views.AiSettingsWindow.ShowSettings()) return;
+      var endpoint = IsblCheck.Services.AiSettings.Endpoint;
+      var model = IsblCheck.Services.AiSettings.Model;
+      var key = IsblCheck.Services.AiSettings.ApiKey;
+      var protocol = IsblCheck.Services.AiSettings.ChatCompletions;
+      var timeout = IsblCheck.Services.AiSettings.TimeoutSeconds;
+      this.aiBusy = true;
+      CommandManager.InvalidateRequerySuggested();
+      var sourceReport = this.Report;
+      try
+      {
+        using var handler = new System.Net.Http.HttpClientHandler { AllowAutoRedirect = false };
+        using var client = new System.Net.Http.HttpClient(handler) { Timeout = TimeSpan.FromSeconds(timeout), MaxResponseContentBufferSize = 1024 * 1024 };
+        var findings = string.Join("\n", new[] { selected }.Concat(sourceReport.Messages.Where(m => m.Document == selected.Document && !ReferenceEquals(m, selected)).OrderBy(m => m.Severity).ThenBy(m => m.Position.Line)).Select(m => $"{m.Code} ({m.Severity.InRussian()}), строка {m.Position.Line}: {m.Description}"));
+        var result = await new IsblCheck.Reports.AiReviewClient(client).ReviewAsync(endpoint, model, selected.Document.Text, findings,
+          System.Threading.CancellationToken.None, protocol, key,
+          $"Тип: {selected.Document.ComponentType}; компонент: {selected.Document.ComponentName}; путь: {selected.Document.Path}; контекстные переменные: {string.Join(", ", (selected.Document.ContextVariables ?? new System.Collections.Generic.List<string>()))}",
+          $"{selected.Code} ({selected.Severity.InRussian()}), строка {selected.Position.Line}, столбец {selected.Position.Column}: {selected.Description}",
+          selected.Recommendation);
+        if (!ReferenceEquals(this.Report, sourceReport))
+          throw new InvalidOperationException("Отчёт изменился во время запроса; повторите анализ для текущего отчёта.");
+        this.aiRecommendations = (this.aiRecommendations ?? "") + $"\nДокумент: {selected.Document.Name}\nПроблема: {selected.Code}, строка {selected.Position.Line}, столбец {selected.Position.Column}: {selected.Description}\nМодель: {model}\n\n{result}\n";
+        ShowAdvice("Рекомендации ИИ", result);
+      }
+      catch (Exception error) { NLog.LogManager.GetCurrentClassLogger().Warn("Ошибка запроса ИИ: {0}", error.GetType().Name); this.viewService.ShowMessageBox(selected.Document.Text?.Length > 1_000_000 ? "Вычисление превышает 1 000 000 символов; целиком отправить его невозможно." : "Не удалось получить ответ ИИ. Проверьте адрес, модель, ключ API и время ожидания.", icon: MessageBoxImage.Error); }
+      finally { this.aiBusy = false; CommandManager.InvalidateRequerySuggested(); }
+    }
+
+    private static void ShowRecommendation(IReportMessage message)
+    {
+      if (message?.Recommendation is not { } recommendation) return;
+      var text = $"{message.Document?.Name}\nСтрока {message.Position.Line}\n\n{message.Description}\n\nЧто изменить\n{recommendation.Action}\n\nКак проверить\n{recommendation.Verification}";
+      ShowAdvice($"Как исправить · {message.Code}", text);
+    }
+
+    private static void ShowAdvice(string title, string text)
+    {
+      var content = new System.Windows.Controls.TextBox
+      {
+        Text = text,
+        IsReadOnly = true,
+        TextWrapping = TextWrapping.Wrap,
+        AcceptsReturn = true,
+        VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Auto,
+        Margin = new Thickness(12, 12, 12, 4),
+        VerticalContentAlignment = VerticalAlignment.Top,
+        HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
+      };
+      var close = new Button
+      {
+        Content = "Закрыть", IsCancel = true,
+        HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(12, 4, 12, 12)
+      };
+      DockPanel.SetDock(close, Dock.Bottom);
+      var layout = new DockPanel();
+      layout.Children.Add(close);
+      layout.Children.Add(content);
+      var window = new Window
+      {
+        Title = title, Content = layout, Width = 720, Height = 460, MinWidth = 300, MinHeight = 210,
+        Owner = Application.Current.MainWindow, WindowStartupLocation = WindowStartupLocation.CenterOwner
+      };
+      window.SourceInitialized += DarkTitleBar.Apply;
+      window.SourceInitialized += WindowSizing.FitDialog;
+      window.ContentRendered += WindowSizing.KeepInitialPositionVisible;
+      window.ShowDialog();
+    }
+
     /// <summary>
     /// Фильтр сообщений.
     /// </summary>
@@ -222,6 +335,13 @@ namespace IsblCheck.ViewModels.Panels
     private bool IsReportMessageShow(object item)
     {
       var reportMessage = item as IReportMessage;
+      if (reportMessage == null) return false;
+      var query = this.SearchText.Trim();
+      if (query.Length > 0 &&
+          (reportMessage.Code ?? string.Empty).IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0 &&
+          (reportMessage.Description ?? string.Empty).IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0 &&
+          (reportMessage.Document?.Name ?? string.Empty).IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0)
+        return false;
       var reportMessageShown = true;
 
       if (!this.IsErrorsShown && reportMessage.Severity == Severity.Error)
@@ -242,6 +362,7 @@ namespace IsblCheck.ViewModels.Panels
     /// <param name="message"></param>
     private void ShowReportMessage(IReportMessage message)
     {
+      if (message?.Document == null) return;
       var documentViewer = PanelManager.Instance
         .GetPanels<DocumentViewerViewModel>()
         .FirstOrDefault(v => v.Document == message.Document);
@@ -255,7 +376,7 @@ namespace IsblCheck.ViewModels.Panels
       }
 
       documentViewer.Show();
-      documentViewer.CaretOffset = message.Position.StartIndex;
+      documentViewer.CaretOffset = Math.Clamp(message.Position.StartIndex, 0, message.Document.Text.Length);
     }
 
     #endregion
@@ -270,8 +391,13 @@ namespace IsblCheck.ViewModels.Panels
     {
       this.TitleLocalizationKey = PanelTitle;
       this.CanClose = false;
+      this.ReportMessages = CollectionViewSource.GetDefaultView(new IReportMessage[0]);
 
       this.ExportAsCsvCommand = new RelayCommand(this.ExportAsCsv, this.CanExportAsCsv);
+      this.ExportAsHtmlCommand = new RelayCommand(this.ExportAsHtml, () => this.Report != null);
+      this.ShowAiCommand = new RelayCommand(() => ShowAdvice("Рекомендации ИИ", this.aiRecommendations), () => !string.IsNullOrEmpty(this.aiRecommendations));
+      this.ShowRecommendationCommand = new RelayCommand<IReportMessage>(ShowRecommendation, selected => selected?.Recommendation != null);
+      this.ReviewWithAiCommand = new RelayCommand<IReportMessage>(this.ReviewWithAi, selected => !this.aiBusy && selected?.Document != null);
       this.ShowReportMessageCommand = new RelayCommand<IReportMessage>(this.ShowReportMessage);
     }
 

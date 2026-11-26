@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Text;
 using IsblCheck.Context.Development.Utils;
 using IsblCheck.Core.Context.Development;
@@ -95,7 +95,7 @@ where
     public string GetWizardsQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return WizardsQuery_7_7;
       return null;
     }

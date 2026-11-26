@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using IsblCheck.Core.Context;
@@ -26,6 +26,9 @@ namespace IsblCheck.Core.Checker
     /// Менеджер отчетов.
     /// </summary>
     IReportManager ReportManager { get; }
+
+    /// <summary>Enable optional advisory rules for subsequent checks.</summary>
+    bool IncludeOptionalRules { get; set; }
 
     /// <summary>
     /// Выполнить проверку.

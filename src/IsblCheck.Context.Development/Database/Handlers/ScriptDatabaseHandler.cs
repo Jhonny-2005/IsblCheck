@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Text;
 using IsblCheck.Core.Context.Development;
 
@@ -20,6 +20,9 @@ namespace IsblCheck.Context.Development.Database.Handlers
       if (string.IsNullOrEmpty(query))
         return components;
 
+      using var checkColumn = new SqlCommand("SELECT COL_LENGTH(N'dbo.MBReports', N'ServerEventName')", connection);
+      var hasServerEvent = checkColumn.ExecuteScalar() != DBNull.Value;
+      query = query.Replace("[Report] as [CalculationText]", "[Report] as [CalculationText], " + (hasServerEvent ? "[ServerEventName]" : "CAST(NULL AS varchar(255))") + " as [ServerEventName], (SELECT TOP 1 m.[Name] FROM dbo.MBRegUnit m WHERE m.[RegUnit]=MBReports.[RegUnit]) AS [ModuleName]");
       var command = new SqlCommand(query, connection);
       using (var reader = command.ExecuteReader())
       {
@@ -30,7 +33,9 @@ namespace IsblCheck.Context.Development.Database.Handlers
             var script = new Script
             {
               Name = reader["Name"] as string,
-              Title = reader["Title"] as string
+              Title = reader["Title"] as string,
+              ServerEventName = reader["ServerEventName"] as string,
+              ModuleName = reader["ModuleName"] as string
             };
             if (ActiveValue.Equals(reader["State"] as string))
               script.State = ComponentState.Active;
@@ -83,7 +88,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetScriptQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return ScriptQuery_7_7;
       return null;
     }

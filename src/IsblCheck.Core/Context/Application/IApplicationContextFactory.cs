@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Core.Context.Application
+namespace IsblCheck.Core.Context.Application
 {
   /// <summary>
   /// Интерфейс фабрики контекста приложения.

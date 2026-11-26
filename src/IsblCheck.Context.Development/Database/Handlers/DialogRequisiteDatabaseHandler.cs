@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using IsblCheck.Core.Context.Development;
 
 namespace IsblCheck.Context.Development.Database.Handlers
@@ -187,7 +187,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetDialogRequisiteQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 15);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return DialogRequisiteQuery_7_15;
       return null;
     }

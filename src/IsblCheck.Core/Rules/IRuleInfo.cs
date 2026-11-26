@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Core.Rules
+namespace IsblCheck.Core.Rules
 {
   /// <summary>
   /// Инфо правила.

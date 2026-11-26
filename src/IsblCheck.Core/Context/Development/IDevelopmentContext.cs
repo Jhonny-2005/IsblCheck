@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace IsblCheck.Core.Context.Development
 {
@@ -7,6 +7,9 @@ namespace IsblCheck.Core.Context.Development
   /// </summary>
   public interface IDevelopmentContext
   {
+    IList<WorkflowRole> WorkflowRoles { get; }
+    IList<DevelopmentModule> Modules { get; }
+    IList<ServerEvent> ServerEvents { get; }
     /// <summary>
     /// Общие отчеты.
     /// </summary>

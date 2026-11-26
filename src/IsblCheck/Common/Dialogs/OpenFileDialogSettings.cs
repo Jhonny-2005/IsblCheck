@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Common.Dialogs
+namespace IsblCheck.Common.Dialogs
 {
   /// <summary>
   /// Настройки диалога открытия файла.

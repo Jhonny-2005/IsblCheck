@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Agent.Configuration
+namespace IsblCheck.Agent.Configuration
 {
   /// <summary>
   /// Тип принтера.

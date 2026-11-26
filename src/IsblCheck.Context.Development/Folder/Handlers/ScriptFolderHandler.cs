@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Common.Logging;
+using NLog;
 using IsblCheck.Context.Development.Package.Handlers;
 using IsblCheck.Context.Development.Package.Models;
 using IsblCheck.Core.Context.Development;
@@ -30,8 +30,7 @@ namespace IsblCheck.Context.Development.Folder.Handlers
 
     #region Поля и свойства
 
-    private static readonly ILog log = LogManager.GetLogger<ScriptFolderHandler>(); 
-
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
     #endregion
 
     #region FolderHandlerBase
@@ -43,6 +42,8 @@ namespace IsblCheck.Context.Development.Folder.Handlers
     protected override IEnumerable<Script> ReadComponents(ComponentModel model, string componentFolderPath)
     {
       var entity = PackageHandlerUtils.CreateEntity<Script>(model);
+      entity.ServerEventName = model.Card?.Requisites?.FirstOrDefault(r => r.Code == "ServerEventName" || r.Code == "ServerEvent" || r.Code == "СерверноеСобытие")?.Value;
+        entity.ModuleName = model.Card?.Requisites?.FirstOrDefault(r => r.Code == "ModuleName" || r.Code == "Module" || r.Code == "Модуль")?.Value;
 
       var stateReq = model.Card.Requisites
         .FirstOrDefault(r => r.Code == StateReqName);

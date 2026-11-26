@@ -1,8 +1,8 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
-using System.Windows.Interactivity;
+using Microsoft.Xaml.Behaviors;
 using System.Windows.Media;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
@@ -142,27 +142,13 @@ namespace IsblCheck.UI.Behaviors
       textEditor.TextArea.TextView.BackgroundRenderers.Remove(this.renderer);
       textEditor.TextArea.TextView.LineTransformers.Remove(this.renderer);
 
-      var scrollViewer = (ScrollViewer)textEditor.Template.FindName("PART_ScrollViewer", textEditor);
-      if (scrollViewer == null)
-        return;
-
-      var vScrollBar = (ScrollBar)scrollViewer.Template.FindName("PART_VerticalScrollBar", scrollViewer);
-      if (vScrollBar == null)
-        return;
-
-      var track = (Track)vScrollBar.Template.FindName("PART_Track", vScrollBar);
-      if (track == null)
-        return;
-
-      var grid = VisualTreeHelper.GetParent(track) as Grid;
-      if (grid == null)
-        return;
-
-      var layer = AdornerLayer.GetAdornerLayer(grid);
-      if (layer == null)
-        return;
-
-      layer.Remove(this.trackAdorner);
+      this.tooltipService?.Dispose();
+      this.tooltipService = null;
+      if (this.trackAdorner != null)
+      {
+        AdornerLayer.GetAdornerLayer(this.trackAdorner.AdornedElement)?.Remove(this.trackAdorner);
+        this.trackAdorner = null;
+      }
     }
 
     #endregion

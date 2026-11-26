@@ -1,4 +1,4 @@
-﻿using ICSharpCode.AvalonEdit.Search;
+using ICSharpCode.AvalonEdit.Search;
 
 namespace IsblCheck.Views.Panels
 {

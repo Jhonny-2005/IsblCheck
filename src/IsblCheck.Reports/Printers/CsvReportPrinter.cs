@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using IsblCheck.Core.Reports;
 using IsblCheck.Reports.Properties;
@@ -79,7 +80,7 @@ namespace IsblCheck.Reports.Printers
             writer.WriteLine(header);
           }
 
-          foreach(var message in report.Messages)
+          foreach (var message in report.Messages.ByImportance())
           {
             var messageText = this.GetFormattedMessage(message, quotableCharacters, doubleQuoteChar);
             writer.WriteLine(messageText);
@@ -105,7 +106,7 @@ namespace IsblCheck.Reports.Printers
       var columns = new[]
       {
         message.Code,
-        message.Severity.ToString(),
+        message.Severity.InRussian(),
         message.Description,
         message.Document.Name,
         message.Position.Line.ToString(),

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime.Misc;
@@ -46,7 +46,8 @@ namespace IsblCheck.BaseRules.Variables
       /// <summary>
       /// Переменная переопределена.
       /// </summary>
-      public bool IsRedefined { get; set; }
+      public bool IsRedefined => RedefinedAtLine.HasValue;
+      public int? RedefinedAtLine { get; set; }
 
       /// <summary>
       /// Контекст переменной.
@@ -130,12 +131,58 @@ namespace IsblCheck.BaseRules.Variables
             return;
         }
 
-        var variableDefinition = this.variableDefinitions
-          .LastOrDefault(d => d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase));
-        if (variableDefinition == null)
-          return;
+        // A lexical last definition can belong to a branch that did not execute.
+        // Keep all still-reaching definitions alive when a read could use them.
+        // A later assignment in an ancestor block of this read did execute on
+        // the normal path to it: do not resurrect an older overwritten value.
+        var dominating = this.variableDefinitions.LastOrDefault(d =>
+          d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase) && IsAncestor(d.StatementBlock, context));
+        foreach (var definition in this.variableDefinitions.Where(d =>
+          d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase) &&
+          (dominating == null || d.VariableContext.Start.StartIndex >= dominating.VariableContext.Start.StartIndex) &&
+          (!d.IsRedefined || IsReadOnExceptionalPath(context, d.VariableContext) || MayReachAfterHandler(context, d))))
+          definition.IsUsed = true;
+      }
 
-        variableDefinition.IsUsed = true;
+      private bool MayReachAfterHandler(IsblParser.VariableContext read, VariableDefinition definition)
+      {
+        for (var node = definition.VariableContext.Parent; node != null; node = node.Parent)
+        {
+          if (node is not IsblParser.StatementBlockContext body ||
+              body.Parent is not IsblParser.TryStatementContext attempt || attempt.EXCEPT() == null ||
+              !ReferenceEquals(body, attempt.statementBlock(0)) || read.Start.StartIndex <= attempt.Stop.StopIndex) continue;
+          // A swallowed exception can also carry the previous value past ENDEXCEPT.
+          // Stop considering it once a later assignment on the read's path replaced it.
+          var overwritten = variableDefinitions.Any(d =>
+            d.VariableName.Equals(definition.VariableName, StringComparison.OrdinalIgnoreCase) &&
+            d.VariableContext.Start.StartIndex > attempt.Stop.StopIndex &&
+            d.VariableContext.Start.StartIndex < read.Start.StartIndex && IsAncestor(d.StatementBlock, read));
+          if (!overwritten) return true;
+        }
+        return false;
+      }
+
+      private static bool IsAncestor(IParseTree ancestor, IParseTree node)
+      {
+        for (var parent = node.Parent; parent != null; parent = parent.Parent)
+          if (ReferenceEquals(parent, ancestor)) return true;
+        return false;
+      }
+
+      private static bool IsReadOnExceptionalPath(IParseTree read, IParseTree definition)
+      {
+        for (var node = read.Parent; node != null; node = node.Parent)
+        {
+          if (node is not IsblParser.StatementBlockContext block ||
+              block.Parent is not IsblParser.TryStatementContext attempt ||
+              !ReferenceEquals(block, attempt.statementBlock(1))) continue;
+          // A failed RHS does not complete its assignment. EXCEPT/FINALLY may
+          // therefore observe an earlier value from this TRY, including one that
+          // was overwritten on the successful path. Do not recommend its removal.
+          for (var parent = definition.Parent; parent != null; parent = parent.Parent)
+            if (ReferenceEquals(parent, attempt.statementBlock(0))) return true;
+        }
+        return false;
       }
 
       /// <summary>
@@ -161,7 +208,7 @@ namespace IsblCheck.BaseRules.Variables
             d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase) && 
             d.StatementBlock == parentStatementBlock);
         if (variableDefinition != null)
-          variableDefinition.IsRedefined = true;
+          variableDefinition.RedefinedAtLine = variableContext.Start.Line;
 
         // Добавляем новую переменную в список.
         variableDefinition = new VariableDefinition
@@ -202,7 +249,7 @@ namespace IsblCheck.BaseRules.Variables
             d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase) &&
             d.StatementBlock == parentStatementBlock);
         if (variableDefinition != null)
-          variableDefinition.IsRedefined = true;
+          variableDefinition.RedefinedAtLine = variableContext.Start.Line;
 
         // Добавляем новую переменную в список.
         variableDefinition = new VariableDefinition
@@ -261,11 +308,14 @@ namespace IsblCheck.BaseRules.Variables
 
       var definitions = listener.variableDefinitions
         .Where(d => d.IsRedefined && !d.IsUsed && 
-        !d.AssignExpression.Equals("null",StringComparison.OrdinalIgnoreCase) &&
-        !d.AssignExpression.Equals("nil",StringComparison.OrdinalIgnoreCase));
+        !string.Equals(d.AssignExpression, "null",StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(d.AssignExpression, "nil",StringComparison.OrdinalIgnoreCase));
       foreach (var definition in definitions)
-        report.AddWarning(Code, string.Format(Resources.VariableIsRedefinedBeforeUsing, definition.VariableName),
-          document, definition.VariableContext.Start.ToTextPosition());
+        report.Add(Severity.Information, Code, string.Format(Resources.VariableIsRedefinedBeforeUsing, definition.VariableName) +
+          " Анализ не исключает чтение в пропущенной ветви или обработчике ошибки. Перед удалением присваивания проверьте значение по умолчанию и побочные эффекты выражения, в том числе освобождение ссылки на COM-объект.",
+          document, definition.VariableContext.Start.ToTextPosition(), new DiagnosticRecommendation(
+            $"Сравните первое определение «{definition.VariableName}» на строке {definition.VariableContext.Start.Line} с повторным на строке {definition.RedefinedAtLine}. Если первое значение нигде не читается и его вычисление не меняет состояние, уберите первое присваивание. Если первое определение задаёт тип или значение для отдельной ветви, сохраните его там, где оно нужно.",
+            $"Проверьте прежнее значение «{definition.VariableName}» в ветвях и обработчиках исключений, а также вызовы или очистку ссылок, которые выполнялись при первом присваивании."));
     }
 
     #endregion

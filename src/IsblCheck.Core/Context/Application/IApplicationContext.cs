@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using IsblCheck.Core.Context.Development;
 
 namespace IsblCheck.Core.Context.Application

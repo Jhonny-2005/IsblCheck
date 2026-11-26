@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using IsblCheck.BaseRules.Properties;
 using IsblCheck.Core.Checker;
 using IsblCheck.Core.Context;
@@ -55,11 +55,14 @@ namespace IsblCheck.BaseRules.Functions
         if (functionText[i] == '\n')
           linesCount++;
       }
-      if (linesCount > 0)
+      if (functionText.Length > 0)
         linesCount++;
       if (linesCount > MaxFunctionLinesCount)
       {
-        report.AddInformation(Code, string.Format(Resources.FunctionTooBig, MaxFunctionLinesCount), document, new TextPosition());
+        report.Add(Severity.Information, Code, $"В функции {linesCount} строк. Ориентир читаемости — {MaxFunctionLinesCount} строк.",
+          document, new TextPosition { Line = 1, Column = 0, StartIndex = 0, EndIndex = 0 }, new DiagnosticRecommendation(
+            "Начните с самостоятельного расчёта, который можно вынести в функцию с явными параметрами и Result. Учтите работу с переменными контекста, ожидаемые побочные эффекты и порядок обращения к объектам.",
+            "Сравните результат, изменения объектов и обработку исключений на одинаковых входных данных до и после выделения функции."));
       }
     }
 

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
-using Common.Logging;
+using NLog;
 using IsblCheck.Common.Dialogs;
 using IsblCheck.Common.Localization;
 using IsblCheck.Common.Panels;
@@ -25,7 +25,7 @@ namespace IsblCheck
     /// <summary>
     /// Логгер.
     /// </summary>
-    private static readonly ILog log = LogManager.GetLogger<App>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Сервис представлений.
@@ -39,6 +39,8 @@ namespace IsblCheck
     /// <param name="e">Аргументы события.</param>
     private void ApplicationStartupHandler(object sender, StartupEventArgs e)
     {
+      LogManager.Setup().LoadConfigurationFromFile(System.IO.Path.Combine(AppContext.BaseDirectory, "NLog.config"), optional: true);
+      log.Info("ISBL Check запущен, версия {0}.", Assembly.GetExecutingAssembly().GetName().Version);
       this.DispatcherUnhandledException += this.DispatcherUnhandledExceptionHandler;
       AppDomain.CurrentDomain.UnhandledException += this.UnhandledExceptionHandler;
 
@@ -89,6 +91,8 @@ namespace IsblCheck
     /// <param name="e">Аргументы события.</param>
     private void ApplicationExitHandler(object sender, ExitEventArgs e)
     {
+      log.Info("ISBL Check завершает работу.");
+      LogManager.Flush();
       this.DispatcherUnhandledException -= this.DispatcherUnhandledExceptionHandler;
       AppDomain.CurrentDomain.UnhandledException -= this.UnhandledExceptionHandler;
     }
@@ -114,7 +118,7 @@ namespace IsblCheck
       var exception = e.ExceptionObject as Exception;
       this.HandleUnhandledException(exception);
       if (e.IsTerminating)
-        log.Error("ISBL Check is terminating due to an unhandled exception in a secondary thread.", exception);
+        log.Error(exception, "ISBL Check is terminating due to an unhandled exception in a secondary thread.");
     }
 
     /// <summary>
@@ -127,16 +131,16 @@ namespace IsblCheck
       try
       {
         var assemblyName = Assembly.GetExecutingAssembly().GetName();
-        message = string.Format("Unhandled exception in {0}. {1}", assemblyName, exception.Message);
+        message = string.Format("Unhandled exception in {0}. {1}", assemblyName, exception.GetBaseException().Message);
         this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
       }
       catch (Exception ex)
       {
-        log.Error("Exception in unhandled exception handler.", ex);
+        log.Error(ex, "Exception in unhandled exception handler.");
       }
       finally
       {
-        log.Error(message, exception);
+        log.Error(exception, message);
       }
     }
   }

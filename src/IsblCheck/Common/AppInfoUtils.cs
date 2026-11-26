@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
@@ -15,7 +15,7 @@ namespace IsblCheck.Common
     /// <returns>Путь до папки приложения.</returns>
     public static string GetDirectoryPath()
     {
-      return Path.GetDirectoryName(new System.Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+      return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
     }
 
     /// <summary>

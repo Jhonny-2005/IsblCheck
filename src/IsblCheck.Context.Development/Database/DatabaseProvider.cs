@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
-using Common.Logging;
+using NLog;
 using IsblCheck.Context.Development.Database.Handlers;
 using IsblCheck.Core.Context.Development;
 
@@ -12,8 +12,12 @@ namespace IsblCheck.Context.Development.Database
   /// <summary>
   /// Провайдер базы данных.
   /// </summary>
-  public class DatabaseProvider : IDevelopmentContextProvider
+  public class DatabaseProvider : IDevelopmentContextProvider, IMetadataAvailability
   {
+    public bool CanValidateReferences => this.platformVersion != null;
+    public bool CanValidateLocalization => this.platformVersion != null &&
+      new LocalizationStringDatabaseHandler().GetLocalizationStringQuery(this.platformVersion) != null;
+
     #region IDevelopmentContextProvider
 
     public IEnumerable<T> ReadComponents<T>() where T : Component
@@ -26,16 +30,16 @@ namespace IsblCheck.Context.Development.Database
         return Enumerable.Empty<T>();
       var handler = (IDatabaseHandler<T>)Activator.CreateInstance(handlerType);
 
-      using (var connection = new SqlConnection(this.connectionString, this.credential))
+      using (var connection = SqlConnectionFactory.Create(this.connectionString, this.credential))
       {
         try
         {
           connection.Open();
-          return handler.Read(connection, platformVersion);
+          return handler.Read(connection, platformVersion).ToList();
         }
         catch (SqlException ex)
         {
-          log.Error("Database connection error.", ex);
+          log.Error("Database connection error: {0}", ex.GetType().Name);
           throw;
         }
       }
@@ -46,6 +50,7 @@ namespace IsblCheck.Context.Development.Database
     /// </summary>
     public void ResetCache()
     {
+      this.platformVersion = null;
     }
 
     #endregion
@@ -70,7 +75,7 @@ namespace IsblCheck.Context.Development.Database
     /// <summary>
     /// Логгер.
     /// </summary>
-    private static readonly ILog log = LogManager.GetLogger<DatabaseProvider>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Строка подключения.
@@ -97,7 +102,7 @@ namespace IsblCheck.Context.Development.Database
     /// <returns>Версия платформы.</returns>
     private Version ReadPlatformVersion()
     {
-      using (var connection = new SqlConnection(this.connectionString, this.credential))
+      using (var connection = SqlConnectionFactory.Create(this.connectionString, this.credential))
       {
         try
         {
@@ -112,7 +117,7 @@ namespace IsblCheck.Context.Development.Database
         }
         catch (SqlException ex)
         {
-          log.Error("Database connection error.", ex);
+          log.Error("Database connection error: {0}", ex.GetType().Name);
           throw;
         }
       }
@@ -134,6 +139,7 @@ namespace IsblCheck.Context.Development.Database
     /// <param name="connectionString">Строка подключения.</param>
     public DatabaseProvider(string connectionString)
     {
+      System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
       this.connectionString = connectionString;
     }
 

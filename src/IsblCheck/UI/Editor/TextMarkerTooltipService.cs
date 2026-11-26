@@ -1,4 +1,7 @@
-﻿using System.Windows.Controls;
+using System;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
@@ -8,7 +11,7 @@ namespace IsblCheck.UI.Editor
   /// <summary>
   /// Сервис подсказок.
   /// </summary>
-  public class TextMarkerTooltipService
+  public class TextMarkerTooltipService : IDisposable
   {
     #region Поля и свойства
 
@@ -16,6 +19,7 @@ namespace IsblCheck.UI.Editor
     /// Редактор.
     /// </summary>
     private readonly TextEditor editor;
+    private readonly TextBlock tooltipText;
 
     /// <summary>
     /// Маркеры.
@@ -33,19 +37,24 @@ namespace IsblCheck.UI.Editor
     /// <param name="e"></param>
     private void EditorToolTipOpeningHandler(object sender, ToolTipEventArgs e)
     {
-      if (this.Markers == null)
-        return;
-
       var point = Mouse.GetPosition(this.editor);
       var position = this.editor.GetPositionFromPoint(point);
-      if (position == null)
-        return;
-      var offset = this.editor.Document.GetOffset(position.Value.Location);
-      var marker = this.Markers.FindFirstSegmentWithStartAfter(offset);
-      if (marker?.ToolTip != null)
-        this.editor.TextArea.ToolTip = marker.ToolTip;
-      else
+      if (this.Markers == null || this.editor.Document == null || position == null)
+      {
         e.Handled = true;
+        return;
+      }
+      var offset = this.editor.Document.GetOffset(position.Value.Location);
+      var marker = this.Markers.FindSegmentsContaining(offset).FirstOrDefault(candidate => candidate.ToolTip != null);
+      e.Handled = marker == null;
+      if (marker != null)
+        this.tooltipText.Text = marker.ToolTip.ToString();
+    }
+
+    public void Dispose()
+    {
+      this.editor.TextArea.ToolTipOpening -= this.EditorToolTipOpeningHandler;
+      this.editor.TextArea.ClearValue(FrameworkElement.ToolTipProperty);
     }
 
     #endregion
@@ -59,7 +68,8 @@ namespace IsblCheck.UI.Editor
     public TextMarkerTooltipService(TextEditor editor)
     {
       this.editor = editor;
-      this.editor.TextArea.ToolTip = string.Empty;
+      this.tooltipText = new TextBlock { MaxWidth = 400, TextWrapping = TextWrapping.Wrap };
+      this.editor.TextArea.ToolTip = new ToolTip { Content = this.tooltipText };
       this.editor.TextArea.ToolTipOpening += this.EditorToolTipOpeningHandler;
     }
 

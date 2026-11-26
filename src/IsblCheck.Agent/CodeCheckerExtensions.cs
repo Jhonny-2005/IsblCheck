@@ -1,5 +1,7 @@
-﻿using System.Configuration;
-using Common.Logging;
+using System;
+using System.Configuration;
+using System.IO;
+using NLog;
 using IsblCheck.Agent.Configuration;
 using IsblCheck.Context.Application;
 using IsblCheck.Context.Development;
@@ -16,7 +18,7 @@ namespace IsblCheck.Agent
   /// </summary>
   public static class CodeCheckerExtensions
   {
-    private static readonly ILog log = LogManager.GetLogger(typeof(CodeCheckerExtensions));
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Сконфигурировать чекер.
@@ -25,6 +27,12 @@ namespace IsblCheck.Agent
     public static void Configure(this ICodeChecker checker)
     {
       var section = (AgentConfigurationSection)ConfigurationManager.GetSection("agent");
+      if (section == null)
+        throw new ConfigurationErrorsException("Не найдена секция конфигурации <agent>.");
+      if (section.ContextProviders == null || section.ContextProviders.Count == 0)
+        throw new ConfigurationErrorsException("В секции <agent> не задан ни один источник контекста разработки.");
+      if (section.ReportPrinters == null || section.ReportPrinters.Count == 0)
+        throw new ConfigurationErrorsException("В секции <agent> не задан ни один способ вывода отчета.");
 
       log.Trace("Загрузка контекста приложения");
       var applicationContextFactory = new ApplicationContextFactory();
@@ -51,13 +59,24 @@ namespace IsblCheck.Agent
             var folderProvider = new FolderProvider(element.FolderPath);
             developmentContextFactory.Providers.Add(folderProvider);
             break;
+          case ContextProviderType.RouteExport:
+            developmentContextFactory.Providers.Add(new IsblCheck.Context.Development.ReferenceExport.StandardRouteExportProvider(element.FilePath));
+            break;
         }
       }
       checker.ContextManager.Load(developmentContextFactory);
 
       log.Trace("Загрузка сборок с правилами анализа");
       if (!string.IsNullOrEmpty(section.RuleLibraryPath))
-        checker.RuleManager.LoadLibraries(section.RuleLibraryPath);
+      {
+        var rulesPath = Path.IsPathRooted(section.RuleLibraryPath)
+          ? section.RuleLibraryPath
+          : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, section.RuleLibraryPath);
+        if (Directory.Exists(rulesPath))
+          checker.RuleManager.LoadLibraries(rulesPath);
+        else
+          throw new ConfigurationErrorsException($"Каталог сборок правил не найден: {rulesPath}");
+      }
 
       log.Trace("Загрузка генераторов отчетов");
       if (section.ReportPrinters != null)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -6,8 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+using IsblCheck.Common.Mvvm;
 using IsblCheck.Common.Dialogs;
 using IsblCheck.Common.Panels;
 using IsblCheck.Services;
@@ -28,6 +27,16 @@ namespace IsblCheck.ViewModels.Containers
     /// Сервис представлений.
     /// </summary>
     private readonly IViewService viewService;
+    private readonly ICodeCheckerService codeCheckerService;
+    public bool IncludeNumericHints
+    {
+      get => this.codeCheckerService.CodeChecker.IncludeOptionalRules;
+      set { this.codeCheckerService.CodeChecker.IncludeOptionalRules = value; this.RaisePropertyChanged(); }
+    }
+    private string aiStatus;
+    public string AiStatus { get => this.aiStatus; private set { this.aiStatus = value; this.RaisePropertyChanged(); this.RaisePropertyChanged(nameof(IsAiRunning)); } }
+    public bool IsAiRunning => !string.IsNullOrEmpty(this.AiStatus);
+    public ICommand CancelAiReviewCommand { get; private set; }
 
     /// <summary>
     /// Команды и обработчики открытия базы/пакета/папки.
@@ -172,6 +181,7 @@ namespace IsblCheck.ViewModels.Containers
     /// Команда открытия пакета.
     /// </summary>
     public ICommand OpenPackageCommand { get; private set; }
+    public ICommand OpenRouteExportCommand { get; private set; }
 
     /// <summary>
     /// Команда открытия базы данных.
@@ -310,10 +320,14 @@ namespace IsblCheck.ViewModels.Containers
     public PanelContainerViewModel(ICodeCheckerService codeCheckerService, IViewService viewService)
     {
       this.viewService = viewService;
+      this.codeCheckerService = codeCheckerService;
+      codeCheckerService.AiStatusChanged += status => { this.AiStatus = status; CommandManager.InvalidateRequerySuggested(); };
+      this.CancelAiReviewCommand = new RelayCommand(codeCheckerService.CancelAiReview, () => this.IsAiRunning);
       this.openCommandHandlers = new OpenCommandHandlers(viewService);
       this.OpenPackageCommand = new RelayCommand(this.openCommandHandlers.OpenPackage);
       this.OpenDatabaseCommand = new RelayCommand(this.openCommandHandlers.OpenDatabase);
       this.OpenFolderCommand = new RelayCommand(this.openCommandHandlers.OpenFolder);
+      this.OpenRouteExportCommand = new RelayCommand(this.openCommandHandlers.OpenRouteExport);
 
       this.Panels = new ObservableCollection<IPanel>();
       this.Panels.CollectionChanged += this.PanelsCollectionChangedHandler;

@@ -1,11 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using Common.Logging;
+using NLog;
 using IsblCheck.Context.Development.Package.Handlers;
 using IsblCheck.Context.Development.Package.Models;
 using IsblCheck.Core.Context.Development;
@@ -15,12 +16,30 @@ namespace IsblCheck.Context.Development.Package
   /// <summary>
   /// Провайдер пакета разработки.
   /// </summary>
-  public class PackageProvider : IDevelopmentContextProvider
+  public class PackageProvider : IDevelopmentContextProvider, IMetadataAvailability
   {
+    public bool CanValidateReferences
+    {
+      get
+      {
+        if (this.packageComponents == null) this.ReadPackage();
+        return this.packageComponents.ReferenceTypesSpecified;
+      }
+    }
+
+    public bool CanValidateLocalization
+    {
+      get
+      {
+        if (this.packageComponents == null) this.ReadPackage();
+        return this.packageComponents.LocalizationStringsSpecified;
+      }
+    }
+
     /// <summary>
     /// Логгер.
     /// </summary>
-    private static readonly ILog log = LogManager.GetLogger<PackageProvider>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Загруженный пакет разработки.
@@ -107,6 +126,7 @@ namespace IsblCheck.Context.Development.Package
     /// <param name="filePath">Путь к файлу пакета.</param>
     public PackageProvider(string filePath)
     {
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
       this.PackageFilePath = filePath;
     }
   }

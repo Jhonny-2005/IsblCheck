@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using IsblCheck.Core.Reports;
 
 namespace IsblCheck.Reports.Printers
@@ -16,9 +16,10 @@ namespace IsblCheck.Reports.Printers
     /// <param name="report">Отчет.</param>
     public void Print(IReport report)
     {
-      foreach (var message in report.Messages)
+      foreach (var message in report.Messages.ByImportance())
       {
-        Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\n", message.Code, message.Severity, message.Description,
+        Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}", message.Code, message.Severity.InRussian(),
+          message.Description, message.Document?.Name ?? string.Empty,
           message.Position.Line, message.Position.Column);
       }
     }

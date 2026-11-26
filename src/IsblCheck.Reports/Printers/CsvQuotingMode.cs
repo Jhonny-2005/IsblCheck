@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Reports.Printers
+namespace IsblCheck.Reports.Printers
 {
   /// <summary>
   /// Режим экранирования для CSV файла.

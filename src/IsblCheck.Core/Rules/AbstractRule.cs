@@ -1,4 +1,4 @@
-﻿using IsblCheck.Core.Checker;
+using IsblCheck.Core.Checker;
 using IsblCheck.Core.Context;
 using IsblCheck.Core.Reports;
 

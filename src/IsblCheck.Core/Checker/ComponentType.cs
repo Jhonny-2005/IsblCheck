@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Core.Checker
+namespace IsblCheck.Core.Checker
 {
   /// <summary>
   /// Тип компоненты.
@@ -63,6 +63,7 @@
     /// <summary>
     /// Мастер действия.
     /// </summary>
-    Wizard
+    Wizard,
+    WorkflowRole
   }
 }

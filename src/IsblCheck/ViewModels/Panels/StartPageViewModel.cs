@@ -1,16 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Input;
-using GalaSoft.MvvmLight.CommandWpf;
+using IsblCheck.Common.Mvvm;
 using IsblCheck.Common.Settings;
 using IsblCheck.Services;
 
 namespace IsblCheck.ViewModels.Panels
 {
-  // TODO: Добавить последние открытые папки.
-
   /// <summary>
   /// Презентер стартовой страницы.
   /// </summary>
@@ -27,6 +25,7 @@ namespace IsblCheck.ViewModels.Panels
     /// Имя настройки для последних открытых пакетов.
     /// </summary>
     private const string LastOpenedPackagesSettingsKey = "LastOpenedPackages";
+    private const string LastOpenedFoldersSettingsKey = "LastOpenedFolders";
 
     #endregion
 
@@ -36,11 +35,14 @@ namespace IsblCheck.ViewModels.Panels
     /// Последние открытые пакеты.
     /// </summary>
     private readonly ObservableCollection<string> lastOpenedPackages = new ObservableCollection<string>();
+    private readonly ObservableCollection<string> lastOpenedFolders = new ObservableCollection<string>();
 
     /// <summary>
     /// Представление последних открытых исходных данных.
     /// </summary>
     public ICollectionView LastOpenedPackagesView { get; private set; }
+
+    public ICollectionView LastOpenedFoldersView { get; private set; }
 
     #endregion
 
@@ -50,6 +52,7 @@ namespace IsblCheck.ViewModels.Panels
     /// Команда открытия пакета.
     /// </summary>
     public ICommand OpenPackageCommand { get; private set; }
+    public ICommand OpenRouteExportCommand { get; private set; }
 
     /// <summary>
     /// Команда открытия базы данных.
@@ -65,6 +68,8 @@ namespace IsblCheck.ViewModels.Panels
     /// Команда открытия файла пакета.
     /// </summary>
     public ICommand OpenSpecifiedPackageCommand { get; private set; }
+
+    public ICommand OpenSpecifiedFolderCommand { get; private set; }
 
     #endregion
 
@@ -95,6 +100,17 @@ namespace IsblCheck.ViewModels.Panels
         this.lastOpenedPackages.Add(value);
     }
 
+    private void LoadLastOpenedFolders()
+    {
+      var settingValue = SettingsManager.Instance.GetValue<List<string>>(LastOpenedFoldersSettingsKey);
+      if (settingValue == null)
+        return;
+
+      this.lastOpenedFolders.Clear();
+      foreach (var value in settingValue)
+        this.lastOpenedFolders.Add(value);
+    }
+
     /// <summary>
     /// Обработчик события изменения настройки.
     /// </summary>
@@ -102,10 +118,10 @@ namespace IsblCheck.ViewModels.Panels
     /// <param name="e">Аргументы события.</param>
     private void SettingChangedHandler(object sender, string e)
     {
-      if (e != LastOpenedPackagesSettingsKey)
-        return;
-
-      this.LoadLastOpenedPackages();
+      if (e == LastOpenedPackagesSettingsKey)
+        this.LoadLastOpenedPackages();
+      else if (e == LastOpenedFoldersSettingsKey)
+        this.LoadLastOpenedFolders();
     }
 
     #endregion
@@ -122,15 +138,19 @@ namespace IsblCheck.ViewModels.Panels
       this.CanClose = true;
       
       this.LastOpenedPackagesView = CollectionViewSource.GetDefaultView(this.lastOpenedPackages);
+      this.LastOpenedFoldersView = CollectionViewSource.GetDefaultView(this.lastOpenedFolders);
 
       this.LoadLastOpenedPackages();
+      this.LoadLastOpenedFolders();
 
       SettingsManager.Instance.SettingChanged += this.SettingChangedHandler;
 
       this.OpenSpecifiedPackageCommand = new RelayCommand<string>(this.openCommandHandlers.OpenSpecifiedPackage);
+      this.OpenSpecifiedFolderCommand = new RelayCommand<string>(this.openCommandHandlers.OpenSpecifiedFolder);
       this.OpenPackageCommand = new RelayCommand(this.openCommandHandlers.OpenPackage);
       this.OpenDatabaseCommand = new RelayCommand(this.openCommandHandlers.OpenDatabase);
       this.OpenFolderCommand = new RelayCommand(this.openCommandHandlers.OpenFolder);
+      this.OpenRouteExportCommand = new RelayCommand(this.openCommandHandlers.OpenRouteExport);
     }
 
     #endregion

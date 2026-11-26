@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using IsblCheck.Core.Checker;
@@ -39,6 +39,8 @@ namespace IsblCheck.Services
     /// <returns>Отчет проверки.</returns>
     Task<IReport> Check(IEnumerable<IDocument> documents, IProgress<int> progress);
 
+    event Action<string> AiStatusChanged;
+    void CancelAiReview();
     ICodeChecker CodeChecker { get; }
   }
 }

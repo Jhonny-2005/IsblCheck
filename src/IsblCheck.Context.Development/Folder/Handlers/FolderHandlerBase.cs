@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using Common.Logging;
+using NLog;
 using IsblCheck.Core.Context.Development;
 
 namespace IsblCheck.Context.Development.Folder.Handlers
@@ -35,8 +35,7 @@ namespace IsblCheck.Context.Development.Folder.Handlers
     /// </summary>
     protected abstract string CardModelRootNode { get; }
 
-    private static readonly ILog log = LogManager.GetLogger<FolderHandlerBase<T, TModel>>(); 
-
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
     #endregion
 
     #region IFolderHandler<T>

@@ -296,7 +296,9 @@ namespace IsblCheck.Context.Application.Enums
     emDelegateAccessRights,
     emReEncode,
     emAddTimestamp,
-    emAddValidationData
+    emAddValidationData,
+    emExportWithoutDecode,
+    emImportWithoutEncode
   }
 
   internal enum TEditorCloseObservType
@@ -976,5 +978,25 @@ namespace IsblCheck.Context.Application.Enums
     wtmFull,
     wtmFromCurrent,
     wtmOnlyCurrent
+  }
+
+  internal enum TLinkingActionType
+  {
+    latCreate,
+    latDelete
+  }
+
+  internal enum TValidationOption
+  {
+    voNone,
+    voSignatureCrlUpdateTimeEndCertOnly,
+    voTimestampCrlUpdateTimeEndCertOnly
+  }
+
+  internal enum TVerifySignatureResult
+  {
+    vsrSuccess,
+    vsrWarning,
+    vsrError
   }
 }

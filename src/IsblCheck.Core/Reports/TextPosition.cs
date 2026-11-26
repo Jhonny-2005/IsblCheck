@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Core.Reports
+namespace IsblCheck.Core.Reports
 {
   /// <summary>
   /// Позиция в тексте.

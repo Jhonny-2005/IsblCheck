@@ -9,6 +9,7 @@
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Styles/ModernTheme.xaml"/>
         <ResourceDictionary Source="/Styles/ValidationErrorTemplate.xaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>

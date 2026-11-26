@@ -1,8 +1,11 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 [assembly: AssemblyProduct("ISBL Check")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCompany("Компания DIRECTUM")]
-[assembly: AssemblyCopyright("Copyright © Компания DIRECTUM 2018")]
-[assembly: AssemblyInformationalVersion("1.2.0.0000")]
+[assembly: AssemblyCompany("KEA")]
+[assembly: AssemblyCopyright("Copyright © 2018 DIRECTUM. Release maintained by KEA.")]
+[assembly: AssemblyVersion("3.16.0.0")]
+[assembly: AssemblyFileVersion("3.16.0.0")]
+[assembly: AssemblyInformationalVersion("3.16.0")]
+
 

@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using IsblCheck.Context.Development.Utils;
@@ -91,7 +91,7 @@ from
     public string GetRouteBlockQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return RouteBlockQuery_7_7;
       return null;
     }

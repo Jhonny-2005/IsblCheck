@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using IsblCheck.Core.Checker;
 
 namespace IsblCheck.Core.Reports
@@ -22,6 +22,9 @@ namespace IsblCheck.Core.Reports
     /// <param name="document">Документ.</param>
     /// <param name="position">Позиция.</param>
     void Add(Severity severity, string code, string description, IDocument document, TextPosition position);
+
+    void Add(Severity severity, string code, string description, IDocument document, TextPosition position,
+      DiagnosticRecommendation recommendation) => Add(severity, code, description, document, position);
 
     /// <summary>
     /// Добавить ошибку.

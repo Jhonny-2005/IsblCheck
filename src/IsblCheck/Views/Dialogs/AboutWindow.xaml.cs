@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 
 namespace IsblCheck.Views.Dialogs
 {
@@ -12,6 +12,9 @@ namespace IsblCheck.Views.Dialogs
     /// </summary>
     public AboutWindow()
     {
+      this.SourceInitialized += DarkTitleBar.Apply;
+      this.SourceInitialized += WindowSizing.FitDialog;
+      this.ContentRendered += WindowSizing.KeepInitialPositionVisible;
       this.InitializeComponent();
     }
   }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime.Tree;
@@ -39,6 +39,7 @@ namespace IsblCheck.BaseRules.Functions
       /// Список контекстов, попадающих под данное правило. 
       /// </summary>
       public List<IsblParser.FunctionContext> ContextWithFunctionErrors { get; } = new List<IsblParser.FunctionContext>();
+      public IContext Context;
 
       /// <summary>
       /// Список интерактивных функций.
@@ -93,7 +94,8 @@ namespace IsblCheck.BaseRules.Functions
       public override void EnterFunction(IsblParser.FunctionContext context)
       {
         var functionName = context.identifier().GetText();
-        if (FunctionsWithInteractiveWindow.Contains(functionName))
+        if (FunctionsWithInteractiveWindow.Contains(functionName) &&
+            !Context.HasUserFunction(functionName))
         {
           ContextWithFunctionErrors.Add(context);
         }
@@ -131,37 +133,44 @@ namespace IsblCheck.BaseRules.Functions
 
     public override void Apply(IReport report, IDocument document, IContext context)
     {
-      // TODO: Пока проверяются только справочники.
-      if (document.ComponentType != ComponentType.ReferenceType ||
+      var isReference = document.ComponentType == ComponentType.ReferenceType;
+      var isDocumentCard = document.ComponentType == ComponentType.DocumentCardType;
+      if ((!isReference && !isDocumentCard) ||
+        string.IsNullOrEmpty(document.Path) ||
         !document.Path.StartsWith(DocumentPathPrefix, StringComparison.OrdinalIgnoreCase) ||
-        !Enum.TryParse(document.Path.Substring(DocumentPathPrefix.Length), out EventType eventType) ||
-        !CheckingEvents.ContainsKey(eventType))
+        !Enum.TryParse(document.Path.Substring(DocumentPathPrefix.Length), true, out EventType eventType) ||
+        !CheckingEvents.TryGetValue(eventType, out var eventName) ||
+        (isDocumentCard && eventType != EventType.BeforeUpdate && eventType != EventType.AfterUpdate))
       {
         return;
       }
 
       var tree = document.GetSyntaxTree();
       var walker = new ParseTreeWalker();
-      var listener = new InteractiveWindowsOnEventsListener();
+      var listener = new InteractiveWindowsOnEventsListener { Context = context };
       walker.Walk(listener, tree);
 
-      var referenceType = context.Development.ReferenceTypes
-        .FirstOrDefault(r => r.Name == document.ComponentName);
-      Severity severity;
-      string description;
-      if (referenceType?.NumerationMethod == NumerationMethod.StronglyAuto)
-      {
-        severity = Severity.Error;
-        description = string.Format(Resources.InteractiveWindowsOnStronglyNumerationReferenceEvents, CheckingEvents[eventType]);
-      }
-      else
-      {
-        severity = Severity.Warning;
-        description = string.Format(Resources.InteractiveWindowsOnEvents, CheckingEvents[eventType]);
-      }
+      var strictlyNumbered = isReference && context.Development.ReferenceTypes.Any(r =>
+        string.Equals(r.Name, document.ComponentName, StringComparison.OrdinalIgnoreCase) &&
+        r.NumerationMethod == NumerationMethod.StronglyAuto);
+      var formEvent = eventType == EventType.FormHide || eventType == EventType.FormShow;
       foreach (var contextWithError in listener.ContextWithFunctionErrors)
       {
-        report.Add(severity, Code, description, document, contextWithError.GetTextPosition());
+        var name = contextWithError.identifier().GetText();
+        var description = $"Событие «{eventName}» содержит потенциально интерактивный вызов «{name}».";
+        if (!formEvent)
+          description += strictlyNumbered
+            ? " Ожидание ответа пользователя может продлить блокировку в справочнике со строгой нумерацией."
+            : " Если открывается окно, проверьте, удерживает ли событие блокировки.";
+        var recommendation = formEvent
+          ? new DiagnosticRecommendation(
+            $"Уточните, нужно ли вызывать «{name}» автоматически при открытии или закрытии карточки. Если окно требуется по инициативе пользователя, перенесите вызов в отдельное действие формы.",
+            "Проверьте открытие и закрытие карточки, включая отмену действия. Убедитесь, что дополнительные окна появляются только в предусмотренном сценарии.")
+          : new DiagnosticRecommendation(
+            $"Проверьте, показывает ли «{name}» окно в этой ветви. Если требуется ввод пользователя, получите его в клиентском действии до сохранения или удаления. Обработчик сохранения должен использовать уже полученные данные.",
+            "Проверьте сохранение или удаление из формы и в пакетном режиме. В многопользовательском сценарии проверьте, что ожидание ввода не продлевает блокировку.");
+        report.Add(formEvent ? Severity.Information : Severity.Warning, Code, description,
+          document, contextWithError.identifier().GetTextPosition(), recommendation);
       }
     }
 

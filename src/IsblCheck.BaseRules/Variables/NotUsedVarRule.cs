@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime.Misc;
@@ -210,8 +210,10 @@ namespace IsblCheck.BaseRules.Variables
       var notUsedVariableDefinitions = listener.variableDefinitions
         .Where(d => !d.IsEverUsed);
       foreach (var notUsedVariableDefinition in notUsedVariableDefinitions)
-        report.AddWarning(Code, string.Format(Resources.NotUsedVariable, notUsedVariableDefinition.VariableName),
-          document, notUsedVariableDefinition.VariableContext.Start.ToTextPosition());
+        report.Add(Severity.Information, Code, $"В тексте вычисления не найдено чтение «{notUsedVariableDefinition.VariableName}».",
+          document, notUsedVariableDefinition.VariableContext.Start.ToTextPosition(), new DiagnosticRecommendation(
+            $"Проверьте назначение «{notUsedVariableDefinition.VariableName}». Если значение действительно не используется, удалите его присваивание только после проверки правой части. Сохраните нужные вызовы, создание объектов и освобождение ссылок.",
+            "Сравните результат вычисления и побочные эффекты до и после правки. Проверьте обращения по имени вне видимого текста."));
     }
 
     #endregion

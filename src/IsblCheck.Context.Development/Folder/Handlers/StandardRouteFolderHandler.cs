@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Common.Logging;
+using NLog;
 using IsblCheck.Context.Development.Folder.Models;
 using IsblCheck.Context.Development.Utils;
 using IsblCheck.Core.Context.Development;
@@ -18,8 +18,6 @@ namespace IsblCheck.Context.Development.Folder.Handlers
     /// Состояние.
     /// </summary>
     private const string StateReqName = "Состояние";
-
-    private const string StateActiveRequisiteValue = "Действующая";
 
     #endregion
 
@@ -41,6 +39,7 @@ namespace IsblCheck.Context.Development.Folder.Handlers
       { "OnCreateNotices", "OnCreateNotices.isbl" },
       { "OnFormShow", "OnFormShow.isbl" },
       { "OnFormHide", "OnFormHide.isbl" },
+      { "OnPreview", "OnPreview.isbl" },
       { "SearchScript", "Monitoring.isbl" },
       { "Script", "Calculation.isbl" },
       { "ISBL", "Condition.isbl" }
@@ -60,7 +59,7 @@ namespace IsblCheck.Context.Development.Folder.Handlers
       { "OnTaskFormHide", "OnTaskFormHide.isbl" }
     };
 
-    private static readonly ILog log = LogManager.GetLogger<StandardRouteFolderHandler>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     #endregion
 
@@ -77,10 +76,9 @@ namespace IsblCheck.Context.Development.Folder.Handlers
         Name = model.Code,
         Title = model.Name
       };
-      var stateReq = model.Requisites
+      var stateReq = model.Requisites?
         .FirstOrDefault(r => r.Name == StateReqName);
-      if (stateReq != null)
-        route.State = stateReq.Value == StateActiveRequisiteValue ? ComponentState.Active : ComponentState.Closed;
+      route.State = RecordStateParser.Parse(stateReq?.Value);
       var descriptionFile = Path.Combine(componentFolderPath, "Properties.xml");
       if (File.Exists(descriptionFile))
       {
@@ -102,7 +100,8 @@ namespace IsblCheck.Context.Development.Folder.Handlers
     {
       foreach (var @event in description.Events)
       {
-        if (eventFileNames.TryGetValue(@event.Name, out string eventFileName))
+        var eventFileName = eventFileNames.TryGetValue(@event.Name, out var mapped) ? mapped : @event.Name + ".isbl";
+        if (eventFileName == Path.GetFileName(eventFileName))
         {
           var eventFile = Path.Combine(componentFolderPath, "Events", eventFileName);
           if (File.Exists(eventFile))
@@ -113,7 +112,7 @@ namespace IsblCheck.Context.Development.Folder.Handlers
           //  log.Warn($"File not found {eventFile}");
         }
         else
-          log.Warn($"Unknown event {@event.Name}");
+          throw new InvalidDataException($"Недопустимое имя события: {@event.Name}");
       }
     }
 

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Common.Logging;
+using NLog;
 using IsblCheck.Context.Development.Package.Handlers;
 using IsblCheck.Context.Development.Package.Models;
 using IsblCheck.Context.Development.Utils;
@@ -53,12 +53,13 @@ namespace IsblCheck.Context.Development.Folder.Handlers
       { "OnCreateNotices", "OnCreateNotices.isbl" },
       { "OnFormShow", "OnFormShow.isbl" },
       { "OnFormHide", "OnFormHide.isbl" },
+      { "OnPreview", "OnPreview.isbl" },
       { "SearchScript", "Monitoring.isbl" },
       { "Script", "Calculation.isbl" },
       { "ISBL", "Condition.isbl" }
     };
 
-    private static readonly ILog log = LogManager.GetLogger<RouteBlockFolderHandler>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     #endregion
 

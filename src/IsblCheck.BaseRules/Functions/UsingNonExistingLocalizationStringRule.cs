@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
@@ -63,6 +63,8 @@ namespace IsblCheck.BaseRules.Functions
         if (!functionName.Equals("LoadString", StringComparison.OrdinalIgnoreCase) &&
             !functionName.Equals("LoadStringFmt", StringComparison.OrdinalIgnoreCase))
           return;
+        if (this.globalContext.HasUserFunction(functionName))
+          return;
         ProcessLoadStringFmtFunction(context);
       }
 
@@ -76,7 +78,7 @@ namespace IsblCheck.BaseRules.Functions
       {
         if (function.parameterList() == null)
           return;
-        var parameters = function.parameterList().expression();
+        var parameters = ParameterListParser.GetExpressions(function.parameterList());
         if (parameters.Length < 2)
           return;
         var name = GetStringOperandValue(parameters[0]);
@@ -109,9 +111,7 @@ namespace IsblCheck.BaseRules.Functions
       /// <returns>Признак того, что такая строка локализации существует.</returns>
       private bool IsLocalizationStringExist(string group, string name)
       {
-        return this.globalContext.Development.LocalizationStrings.Any(
-          s => s.Group.Equals(group, StringComparison.OrdinalIgnoreCase) &&
-               s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        return this.globalContext.FindLocalization(group, name) != null;
       }
 
       /// <summary>
@@ -121,10 +121,11 @@ namespace IsblCheck.BaseRules.Functions
       /// <returns>Строковая константа, либо null, если выражение не является строкой.</returns>
       private static string GetStringOperandValue(IsblParser.ExpressionContext expression)
       {
-        var operand = expression.operand();
+        var operand = expression?.operand();
         if (operand?.@string() == null)
           return null;
-        return operand.@string().GetText().Trim('\'', '"');
+        var text = operand.@string().GetText();
+        return text.Substring(1, text.Length - 2);
       }
 
       /// <summary>
@@ -141,14 +142,18 @@ namespace IsblCheck.BaseRules.Functions
 
     public override void Apply(IReport report, IDocument document, IContext context)
     {
+      if (context.Development is IsblCheck.Core.Context.Development.IMetadataAvailability metadata && !metadata.CanValidateLocalization) return;
       var tree = document.GetSyntaxTree();
       var walker = new ParseTreeWalker();
       var listener = new UsingNonExistingLocalizationStringListener(context);
       walker.Walk(listener, tree);
       foreach (var entry in listener.Entries)
       {
-        var description = string.Format(Resources.LocalizationStringNotFound, entry.LocalizationStringGroup, entry.LocalizationStringName);
-        report.AddError(Code, description, document, entry.Context.GetTextPosition());
+        var description = $"Строка локализации \"{entry.LocalizationStringGroup}.{entry.LocalizationStringName}\" не найдена в загруженном каталоге. Проверьте полноту источников и наличие строки в установленной системе.";
+        report.Add(Severity.Warning, Code, description, document, entry.Context.GetTextPosition(),
+          new DiagnosticRecommendation(
+            $"Сверьте группу «{entry.LocalizationStringGroup}» и ключ «{entry.LocalizationStringName}». Исправьте ссылку на существующий ключ или включите его в перенос разработки вместе с переводами.",
+            "Проверьте вывод на поддерживаемых языках. Для шаблона с подстановками проверьте также позиции и типы аргументов в каждом переводе."));
       }
     }
 

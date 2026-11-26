@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using IsblCheck.Common.Dialogs;
 using IsblCheck.Common.Localization;
 using IsblCheck.Common.Panels;
@@ -19,7 +19,7 @@ namespace IsblCheck.ViewModels
     /// <summary>
     /// Фильтр ISX файлов.
     /// </summary>
-    protected const string IsxFileFilter = "ISX File(*.isx)|*.isx";
+    protected const string IsxFileFilter = "Пакеты разработки ISX (*.isx)|*.isx";
 
     #endregion
 
@@ -54,6 +54,18 @@ namespace IsblCheck.ViewModels
         return;
 
       this.OpenSpecifiedPackage(filename);
+    }
+
+    public void OpenRouteExport()
+    {
+      var settings = new OpenFileDialogSettings {
+        Filter = "Выгрузка маршрутов Directum (*.xml;*.dat)|*.xml;*.dat", InitialDirectory = Environment.CurrentDirectory
+      };
+      if (this.viewService.ShowOpenFileDialog(PanelManager.Instance.PanelContainer, settings) != true || string.IsNullOrWhiteSpace(settings.FileName)) return;
+      var explorer = PanelManager.Instance.GetPanel<SourceExplorerViewModel>()
+        ?? PanelManager.Instance.CreatePanel<SourceExplorerViewModel>(true);
+      explorer.Show();
+      explorer.OpenRouteExportAsync(settings.FileName);
     }
 
     /// <summary>
@@ -118,6 +130,20 @@ namespace IsblCheck.ViewModels
 
       sourceExplorer.Show();
       sourceExplorer.OpenPackageAsync(filename);
+    }
+
+    /// <summary>
+    /// Открыть папку с разработкой.
+    /// </summary>
+    /// <param name="folderPath">Путь к папке.</param>
+    public void OpenSpecifiedFolder(string folderPath)
+    {
+      var sourceExplorer = PanelManager.Instance.GetPanel<SourceExplorerViewModel>();
+      if (sourceExplorer == null)
+        sourceExplorer = PanelManager.Instance.CreatePanel<SourceExplorerViewModel>(true);
+
+      sourceExplorer.Show();
+      sourceExplorer.OpenFolderAsync(folderPath);
     }
 
     #endregion

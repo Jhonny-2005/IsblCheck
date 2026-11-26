@@ -1,14 +1,16 @@
-﻿using System;
+using System;
+using System.IO;
+using IsblCheck.Context.Development.ReferenceExport;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using GalaSoft.MvvmLight.CommandWpf;
+using IsblCheck.Common.Mvvm;
 using IsblCheck.Common.Localization;
 using IsblCheck.Common.Panels;
 using IsblCheck.Common.Settings;
@@ -32,6 +34,7 @@ namespace IsblCheck.ViewModels.Panels
     /// <summary>
     /// Заголовок панели.
     /// </summary>
+    private static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
     private const string PanelTitle = "SOURCE_EXPLORER";
 
     /// <summary>
@@ -89,6 +92,9 @@ namespace IsblCheck.ViewModels.Panels
     }
     private string componentFilterText;
 
+    public string ImportSummary { get; private set; }
+    public bool HasImportSummary => !string.IsNullOrEmpty(this.ImportSummary);
+
     #endregion
 
     #region Команды
@@ -127,13 +133,14 @@ namespace IsblCheck.ViewModels.Panels
       {
         var provider = new PackageProvider(fileName);
         await this.LoadDevelopmentAsync(provider, fileName);
+        SaveLastOpenedPackage(fileName);
       }
-      catch
+      catch (Exception error)
       {
+        Log.Error("Не удалось загрузить пакет: {0}", error.GetType().Name);
         var message = LocalizationManager.Instance.LocalizeString("ERROR_PACKAGE_READ");
         this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
       }
-      SaveLastOpenedPackage(fileName);
     }
 
     /// <summary>
@@ -148,8 +155,9 @@ namespace IsblCheck.ViewModels.Panels
         var provider = new DatabaseProvider(connectionString, credential);
         await this.LoadDevelopmentAsync(provider, connectionString);
       }
-      catch
+      catch (Exception error)
       {
+        Log.Error("Не удалось загрузить базу данных: {0}", error.GetType().Name);
         var message = LocalizationManager.Instance.LocalizeString("ERROR_DATABASE_READ");
         this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
       }
@@ -161,13 +169,28 @@ namespace IsblCheck.ViewModels.Panels
       {
         var provider = new FolderProvider(workspacePath);
         await this.LoadDevelopmentAsync(provider, workspacePath);
+        SaveLastOpenedFolder(workspacePath);
       }
-      catch
+      catch (Exception exception)
       {
+        Log.Error("Не удалось загрузить папку: {0}", exception.GetType().Name);
         var message = LocalizationManager.Instance.LocalizeString("ERROR_FOLDER_READ");
-        this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
+        this.viewService.ShowMessageBox(message + "\n" + exception.Message, icon: MessageBoxImage.Error);
       }
-      SaveLastOpenedFolder(workspacePath);
+    }
+
+    public async void OpenRouteExportAsync(string fileName)
+    {
+      try
+      {
+        await this.LoadDevelopmentAsync(new StandardRouteExportProvider(fileName), fileName);
+        SaveLastOpenedFolder(Path.GetDirectoryName(Path.GetFullPath(fileName)));
+      }
+      catch (Exception exception)
+      {
+        Log.Error("Не удалось загрузить маршруты: {0}", exception.GetType().Name);
+        this.viewService.ShowMessageBox("Не удалось загрузить выгрузку маршрутов.\n" + exception.Message, icon: MessageBoxImage.Error);
+      }
     }
 
     private static void SaveLastOpenedPackage(string fileName)
@@ -176,7 +199,8 @@ namespace IsblCheck.ViewModels.Panels
       if (lastOpenedPackages == null)
         lastOpenedPackages = new List<string>();
 
-      var packageFileIndex = lastOpenedPackages.FindIndex(f => f.ToLower() == fileName.ToLower());
+      var packageFileIndex = lastOpenedPackages.FindIndex(f =>
+        string.Equals(f, fileName, StringComparison.OrdinalIgnoreCase));
       if (packageFileIndex >= 0)
         lastOpenedPackages.RemoveAt(packageFileIndex);
 
@@ -194,7 +218,8 @@ namespace IsblCheck.ViewModels.Panels
       if (lastOpenedFolders == null)
         lastOpenedFolders = new List<string>();
 
-      var folderIndex = lastOpenedFolders.FindIndex(f => f.ToLower() == folderName.ToLower());
+      var folderIndex = lastOpenedFolders.FindIndex(f =>
+        string.Equals(f, folderName, StringComparison.OrdinalIgnoreCase));
       if (folderIndex >= 0)
         lastOpenedFolders.RemoveAt(folderIndex);
 
@@ -224,10 +249,23 @@ namespace IsblCheck.ViewModels.Panels
         var componentTypeNodes = this.sourceTreeGenerator.Generate(rootNodeTitle, this.codeCheckerService.CodeChecker.ContextManager.Context.Development);
         foreach (var componentTypeNode in componentTypeNodes)
           this.componentTypes.Add(componentTypeNode);
+        var context = this.codeCheckerService.CodeChecker.ContextManager.Context.Development;
+        this.ImportSummary = null;
+        if (context.StandardRoutes.Count > 0 || context.WorkflowRoles.Count > 0)
+        {
+          var count = context.StandardRoutes.SelectMany(r => WorkflowDocumentProvider.GetDocuments(r))
+            .Concat(context.WorkflowRoles.SelectMany(r => WorkflowDocumentProvider.GetDocuments(r))).Count();
+          this.ImportSummary = $"Маршруты: {context.StandardRoutes.Count} · Роли: {context.WorkflowRoles.Count}\nВычисления ISBL: {count}";
+          if (context is IMetadataAvailability metadata && (!metadata.CanValidateReferences || !metadata.CanValidateLocalization))
+            this.ImportSummary += "\nКонтекст зависимостей неполный. Проверки отсутствующих метаданных ограничены.";
+        }
+        this.RaisePropertyChanged(nameof(ImportSummary));
+        this.RaisePropertyChanged(nameof(HasImportSummary));
       }
       finally
       {
         PanelManager.Instance.PanelContainer.IsBusyIndicatorVisible = false;
+        CommandManager.InvalidateRequerySuggested();
       }
     }
 
@@ -269,6 +307,11 @@ namespace IsblCheck.ViewModels.Panels
       foreach (var componentType in this.componentTypes)
         documents.AddRange(GetDocuments(componentType));
 
+      // Scripts also appear under their module and server event. Preserve all other documents.
+      var seenScripts = new HashSet<(string Name, string Path)>();
+      documents = documents.Where(d => d.ComponentType != ComponentType.Script ||
+        seenScripts.Add(((d.ComponentName ?? "").ToUpperInvariant(), (d.Path ?? "").ToUpperInvariant()))).ToList();
+
       PanelManager.Instance.PanelContainer.ProgressMaximum = documents.Count;
       var progress = new Progress<int>(value =>
       {
@@ -281,26 +324,33 @@ namespace IsblCheck.ViewModels.Panels
       });
       PanelManager.Instance.PanelContainer.IsProgressVisible = true;
 
-      var report = await this.codeCheckerService.Check(documents, progress);
-
-      Application.Current.Dispatcher.Invoke(() =>
+      try
       {
-        var reportViewer = PanelManager.Instance.GetPanel<ReportViewerViewModel>();
-        if (reportViewer == null)
-          reportViewer = PanelManager.Instance.CreatePanel<ReportViewerViewModel>();
+        var report = await this.codeCheckerService.Check(documents, progress);
 
-        reportViewer.Show();
-        reportViewer.ShowReport(report);
-
-        var documentViewers = PanelManager.Instance.GetPanels<DocumentViewerViewModel>();
-        foreach (var documentViewer in documentViewers)
+        Application.Current.Dispatcher.Invoke(() =>
         {
-          var messages = report.Messages
-            .Where(m => m.Document == documentViewer.Document);
-          documentViewer.ClearReportMessages();
-          documentViewer.AddReportMessages(messages);
-        }
-      });
+          var reportViewer = PanelManager.Instance.GetPanel<ReportViewerViewModel>();
+          if (reportViewer == null)
+            reportViewer = PanelManager.Instance.CreatePanel<ReportViewerViewModel>();
+
+          reportViewer.Show();
+          reportViewer.ShowReport(report);
+
+          var documentViewers = PanelManager.Instance.GetPanels<DocumentViewerViewModel>();
+          foreach (var documentViewer in documentViewers)
+          {
+            var messages = report.Messages
+              .Where(m => m.Document == documentViewer.Document);
+            documentViewer.ClearReportMessages();
+            documentViewer.AddReportMessages(messages);
+          }
+        });
+      }
+      finally
+      {
+        PanelManager.Instance.PanelContainer.IsProgressVisible = false;
+      }
     }
 
     /// <summary>
@@ -326,26 +376,33 @@ namespace IsblCheck.ViewModels.Panels
       });
       PanelManager.Instance.PanelContainer.IsProgressVisible = true;
 
-      var report = await this.codeCheckerService.Check(documents, progress);
-
-      Application.Current.Dispatcher.Invoke(() =>
+      try
       {
-        var reportViewer = PanelManager.Instance.GetPanel<ReportViewerViewModel>();
-        if (reportViewer == null)
-          reportViewer = PanelManager.Instance.CreatePanel<ReportViewerViewModel>();
+        var report = await this.codeCheckerService.Check(documents, progress);
 
-        reportViewer.Show();
-        reportViewer.ShowReport(report);
-
-        var documentViewers = PanelManager.Instance.GetPanels<DocumentViewerViewModel>();
-        foreach (var documentViewer in documentViewers)
+        Application.Current.Dispatcher.Invoke(() =>
         {
-          var messages = report.Messages
-            .Where(m => m.Document == documentViewer.Document);
-          documentViewer.ClearReportMessages();
-          documentViewer.AddReportMessages(messages);
-        }
-      });
+          var reportViewer = PanelManager.Instance.GetPanel<ReportViewerViewModel>();
+          if (reportViewer == null)
+            reportViewer = PanelManager.Instance.CreatePanel<ReportViewerViewModel>();
+
+          reportViewer.Show();
+          reportViewer.ShowReport(report);
+
+          var documentViewers = PanelManager.Instance.GetPanels<DocumentViewerViewModel>();
+          foreach (var documentViewer in documentViewers)
+          {
+            var messages = report.Messages
+              .Where(m => m.Document == documentViewer.Document);
+            documentViewer.ClearReportMessages();
+            documentViewer.AddReportMessages(messages);
+          }
+        });
+      }
+      finally
+      {
+        PanelManager.Instance.PanelContainer.IsProgressVisible = false;
+      }
     }
 
     /// <summary>

@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Windows.Input;
 using System.Windows.Media;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+using IsblCheck.Common.Mvvm;
 using IsblCheck.Common.Panels;
 using IsblCheck.Services;
 

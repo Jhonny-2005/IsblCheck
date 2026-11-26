@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Agent.Configuration
+namespace IsblCheck.Agent.Configuration
 {
   /// <summary>
   /// Тип провайдера контекста разработки.
@@ -18,6 +18,7 @@
     /// <summary>
     /// Папка.
     /// </summary>
-    Folder
+    Folder,
+    RouteExport
   }
 }

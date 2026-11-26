@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Reflection;
-using Common.Logging;
+using NLog;
 using IsblCheck.Core.Exceptions;
 using IsblCheck.Core.Properties;
 
@@ -20,7 +20,7 @@ namespace IsblCheck.Core.Rules
     /// <summary>
     /// Логгер.
     /// </summary>
-    private static readonly ILog log = LogManager.GetLogger<RuleManager>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Каталог со сборками правил.

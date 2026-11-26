@@ -1,75 +1,9 @@
-# ISBL Check
+# ISBL Check 3.16.0
 
-[![License](https://img.shields.io/github/license/mashape/apistatus.svg)][License]
-![Supported platforms](https://img.shields.io/badge/platform-win--32%20%7C%20win--64-green.svg)
-[![GitHub issues](https://img.shields.io/github/issues/DirectumCompany/IsblCheck.svg)][Issues]
-[![GitHub release](https://img.shields.io/github/release/DirectumCompany/IsblCheck.svg)][Releases]
+Статический анализатор ISBL и типовых маршрутов classic Directum. Автор этой версии — KEA. Исходный проект DIRECTUM распространяется по лицензии MIT.
 
-# Описание
+В Windows x64 распакуйте архив IsblCheck-3.16.0-win-x64 и запустите IsblCheck.exe. Консольный агент доступен отдельным архивом.
 
-Инструмент для анализа ISBL кода, который служит для выявления ошибок в коде на стадии разработки. По сути является статическим анализатором кода.
+В анализаторе можно открыть пакет ISX, каталог разработки, базу Directum или выгрузку маршрутов XML/DAT со связанными IMG. В дереве маршрута раздел «Схема и параметры» показывает объявления, привязки и переходы. В отчёте ошибки идут первыми, затем предупреждения и информационные подсказки.
 
-![isblcheck](https://user-images.githubusercontent.com/34789335/34760471-637a5ae4-f5f9-11e7-9dbd-2c61cebeba84.png)
-
-* Умеет выгружать разработку из базы данных, из пакета разработки (ISX-файла), а также из папки с разработкой, используемой утилитой [DTU](https://github.com/DirectumCompany/DevelopmentTransferUtility);
-* Умеет отображать результаты проверки и подсвечивать ошибки прямо в вычислениях;
-* Отчет о проверке отображается в окне утилиты и может быть сохранен в файл;
-* Имеется консольный агент для проверки разработки в невизуальном режиме.
-
-Категории ошибок:
-
-* Возможные Runtime ошибки (ERROR);
-* Проверки на неоптимальный код (WARNING);
-* Прочие проверки (INFO).
-
-# Состав сборок
-
-[**IsblCheck**](https://github.com/DirectumCompany/IsblCheck/tree/master/src/IsblCheck)
-GUI версия приложения. Имеет возможность загружать пакеты в проводник, открывать код на просмотр, отправлять код на проверку и выводить ошибки. GUI очень похож на Visual Studio. Есть возможность перемещать панели как хочется пользователю.
-
-[**IsblCheck.Agent**](https://github.com/DirectumCompany/IsblCheck/tree/master/src/IsblCheck.Agent)
-Консольная версия IsblCheck, которая проверяет код написанный на ISBL по указанной конфигурации. В конфигурации указывается параметры для загрузки разработки, состав отчетов, сборки с правилами и пр.
-
-[**IsblCheck.Core**](https://github.com/DirectumCompany/IsblCheck/tree/master/src/IsblCheck.Core)
-Ядро IsblCheck. Содержит в себе все интерфейсы, менеджеры, лексический и синтаксический парсер. Выполняет непосредственную проверку по правилам.
-
-[**IsblCheck.Context.Development**](https://github.com/DirectumCompany/IsblCheck/tree/master/src/IsblCheck.Context.Development)
-Сборка загрузки контекста разработки. Выполняет загрузку прикладного кода.
-
-[**IsblCheck.Context.Application**](https://github.com/DirectumCompany/IsblCheck/tree/master/src/IsblCheck.Context.Application)
-Сборка загрузки контекста приложения. Выполняет загрузку системных констант, перечислений, ОМ IS-Builder.
-
-[**IsblCheck.Reports**](https://github.com/DirectumCompany/IsblCheck/tree/master/src/IsblCheck.Reports)
-Сборка работы с отчетами. Содержит классы по работе с отчетами. Содержит принтеры отчетов: в консоль, в CSV-файл.
-
-[**IsblCheck.Setup**](https://github.com/DirectumCompany/IsblCheck/tree/master/installer/IsblCheck.Setup)
-Standalone-инсталлятор для IsblCheck. Пока без интерфейса, простой msi-пакет.
-
-[**IsblCheck.Agent.Setup**](https://github.com/DirectumCompany/IsblCheck/tree/master/installer/IsblCheck.Agent.Setup)
-Standalone-инсталлятор для агента IsblCheck. Пока без интерфейса, простой msi-пакет.
-
-# Сборка
-
-#### Установка необходимого ПО
-
-Для построения проекта необходимо:
-* Visual Studio 2017
-* [Расширение Antlr](https://visualstudiogallery.msdn.microsoft.com/25b991db-befd-441b-b23b-bb5f8d07ee9f)
-* [Расширение SlowCheetah](https://github.com/Microsoft/slow-cheetah)
-* [JRE](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-
-Для сборки инсталляторов дополнительно необходимо поставить:
-* WiX Toolset v3;
-* расширение WiX для Visual Studio.
-
-Всё это можно найти здесь: http://wixtoolset.org/releases/
-
-#### Порядок сборки
-
-* Скачать проект через утилиты по работе с Git;
-* Восстановить зависимости решения через NuGet;
-* Выполнить сборку решения. Сборка выполняется в каталог _$(SolutionDir)\artifacts\bin_
-
-[Releases]: ../../releases "Releases"
-[Issues]: ../../issues "Issues"
-[License]: /LICENSE "License"
+Для сборки в Windows с .NET SDK 10 выполните: dotnet build IsblCheck.sln -c Release

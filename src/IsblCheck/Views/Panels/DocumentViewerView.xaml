@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="IsblCheck.Views.Panels.DocumentViewerView"
+<UserControl x:Class="IsblCheck.Views.Panels.DocumentViewerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:ae="http://icsharpcode.net/sharpdevelop/avalonedit"
              xmlns:b="clr-namespace:IsblCheck.UI.Behaviors"
              mc:Ignorable="d" 
@@ -11,9 +11,9 @@
   <Grid>
     <ae:TextEditor x:Name="TextEditor"
                    Document="{Binding TextDocument, Mode=OneWay}"
-                   IsReadOnly="True"
+                   IsReadOnly="True" Background="{StaticResource SurfaceBrush}" Foreground="{StaticResource InkBrush}" Padding="18,14" LineNumbersForeground="#8490A6"
                    SyntaxHighlighting="{Binding SyntaxHighlighting, Mode=OneWay}"
-                   FontFamily="Consolas" FontSize="14" ShowLineNumbers="True"
+                   FontFamily="{StaticResource CodeFont}" FontSize="14" ShowLineNumbers="True"
                    b:FocusBehavior.IsFocused="{Binding IsSelected, Mode=OneWay}">
       <i:Interaction.Behaviors>
         <b:TextMarkerViewBehavior Markers="{Binding Markers, Mode=OneWay}"/>

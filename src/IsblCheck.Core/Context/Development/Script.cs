@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Core.Context.Development
+namespace IsblCheck.Core.Context.Development
 {
   /// <summary>
   /// Cценарий.
@@ -9,6 +9,12 @@
     /// Состояние.
     /// </summary>
     public ComponentState State { get; set; }
+
+    /// <summary>Server event name, if known.</summary>
+    public string ServerEventName { get; set; }
+
+    /// <summary>Module name, if known.</summary>
+    public string ModuleName { get; set; }
 
     /// <summary>
     /// Текст вычисления сценария.

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace IsblCheck.Context.Development.Package.Models
@@ -65,9 +65,18 @@ namespace IsblCheck.Context.Development.Package.Models
     [XmlArrayItem("LocalizedStrings")]
     public List<ComponentModel> LocalizationStrings { get; set; }
 
+    // XmlSerializer sets Specified when the element is present, including an
+    // explicitly empty catalog. Missing sections in partial packages stay false.
+    [XmlIgnore]
+    public bool LocalizationStringsSpecified { get; set; }
+
     /// <summary>
     /// Модели модулей.
     /// </summary>
+    [XmlArray("ServerEvents")]
+    [XmlArrayItem("ServerEvents")]
+    public List<ComponentModel> ServerEvents { get; set; }
+
     [XmlArray("Modules")]
     [XmlArrayItem("Modules")]
     public List<ComponentModel> Modules { get; set; }
@@ -85,6 +94,9 @@ namespace IsblCheck.Context.Development.Package.Models
     [XmlArray("RefTypes")]
     [XmlArrayItem("RefTypes")]
     public List<ComponentModel> ReferenceTypes { get; set; }
+
+    [XmlIgnore]
+    public bool ReferenceTypesSpecified { get; set; }
 
     /// <summary>
     /// Модели отчетов.

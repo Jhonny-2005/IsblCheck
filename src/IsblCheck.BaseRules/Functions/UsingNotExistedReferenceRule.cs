@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
@@ -81,7 +81,6 @@ namespace IsblCheck.BaseRules.Functions
       /// <summary>
       /// Список доступных прикладных справочников. 
       /// </summary>
-      private readonly HashSet<string> developmentReferenceNames;
 
       /// <summary>
       /// Конструктор.
@@ -90,9 +89,6 @@ namespace IsblCheck.BaseRules.Functions
       public NotExistReferenceListener(IContext context)
       {
         this.mainContext = context;
-        this.developmentReferenceNames = new HashSet<string>(
-          mainContext.Development.ReferenceTypes
-            .Select(x => x.Name.Trim()), StringComparer.OrdinalIgnoreCase);
       }
 
       /// <summary>
@@ -105,7 +101,7 @@ namespace IsblCheck.BaseRules.Functions
           context.parameterList() != null && context.parameterList().expression().Any())
         {
           // Обращение к справочнику через ReferencesFactory().
-          var firstParam = context.parameterList().expression(0);
+          var firstParam = ParameterListParser.GetExpressions(context.parameterList()).FirstOrDefault();
           CheckReferenceInExpressionExists(firstParam);
         }
         else if (context.Parent.GetChild(0) is IsblParser.VariableContext)
@@ -149,10 +145,11 @@ namespace IsblCheck.BaseRules.Functions
         var functionName = context.identifier().GetText();
         if ((functionName.Equals(CreateReferenceFunctionEn, StringComparison.OrdinalIgnoreCase) ||
           functionName.Equals(CreateReferenceFunctionRu, StringComparison.OrdinalIgnoreCase)) &&
-          context.parameterList().expression().Any())
+          context.parameterList()?.expression().Any() == true &&
+          !mainContext.HasUserFunction(functionName))
         {
           // Создание справочника через функцию CreateReference().
-          var firstParam = context.parameterList().expression(0);
+          var firstParam = ParameterListParser.GetExpressions(context.parameterList()).FirstOrDefault();
           CheckReferenceInExpressionExists(firstParam);
         }
       }
@@ -163,11 +160,16 @@ namespace IsblCheck.BaseRules.Functions
       /// <param name="expression">Выражение с именем справочника.</param>
       private void CheckReferenceInExpressionExists(IsblParser.ExpressionContext expression)
       {
-        var stringContext = expression.operand()?.@string();
+        while (expression?.operand()?.expression() is { } inner)
+          expression = inner;
+        var operand = expression?.operand();
+        if (operand == null || operand.indexer() != null || operand.invocationCall().Length != 0 || operand.POINTER() != null) return;
+        var stringContext = operand.@string();
         if (stringContext != null)
         {
           // Имя справочника в виде строки, например, "ПОЛ".
-          var referenceName = stringContext.GetText().Trim('\'', '"');
+          var literal = stringContext.GetText();
+          var referenceName = literal.Substring(1, literal.Length - 2);
           if (!IsReferenceExists(referenceName, withOldReferences: true))
           {
             UsingReferenceEntries.Add(new UsingReferenceEntry { Context = expression, ReferenceName = referenceName });
@@ -175,7 +177,7 @@ namespace IsblCheck.BaseRules.Functions
         }
         else
         {
-          var variableContext = expression.operand()?.variable();
+          var variableContext = operand.variable();
           if (variableContext != null)
           {
             var variableName = variableContext.GetText();
@@ -200,7 +202,7 @@ namespace IsblCheck.BaseRules.Functions
       /// <returns>Возвращает false, если справочника не существует.</returns>
       private bool IsReferenceExists(string name, bool withOldReferences)
       {
-        return developmentReferenceNames.Contains(name) ||
+        return mainContext.HasDevelopmentReference(name) ||
           mainContext.Application.IsExistsSysReference(name, withOldReferences);
       }
     }
@@ -239,6 +241,7 @@ namespace IsblCheck.BaseRules.Functions
     /// <param name="context">Контекст.</param>
     public override void Apply(IReport report, IDocument document, IContext context)
     {
+      if (context.Development is IsblCheck.Core.Context.Development.IMetadataAvailability metadata && !metadata.CanValidateReferences) return;
       var tree = document.GetSyntaxTree();
       var walker = new ParseTreeWalker();
       var listener = new NotExistReferenceListener(context);
@@ -246,9 +249,11 @@ namespace IsblCheck.BaseRules.Functions
 
       foreach (var entry in listener.UsingReferenceEntries)
       {
-        report.AddError(Code,
-          string.Format(Resources.UsingNotExistedReference, entry.ReferenceName),
-          document, entry.Context.GetTextPosition());
+        report.Add(Severity.Warning, Code,
+          $"Справочник \"{entry.ReferenceName}\" не найден в загруженном контексте. Проверьте полноту разработки и наличие справочника в установленной системе.",
+          document, entry.Context.GetTextPosition(), new DiagnosticRecommendation(
+            $"Сверьте код типа справочника «{entry.ReferenceName}» в целевой системе. Если ссылка верна, добавьте зависимость в комплект переноса или загрузите полный каталог для анализа.",
+            "Повторите анализ с целевыми метаданными и проверьте открытие справочника под учётной записью, которая выполняет вычисление."));
       }
     }
 

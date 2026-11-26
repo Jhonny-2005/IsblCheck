@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Views.Dialogs
+namespace IsblCheck.Views.Dialogs
 {
   /// <summary>
   /// Представление окно запроса данных подключения к базе.
@@ -10,6 +10,9 @@
     /// </summary>
     public DatabaseCredentialWindow()
     {
+      this.SourceInitialized += DarkTitleBar.Apply;
+      this.SourceInitialized += WindowSizing.FitDialog;
+      this.ContentRendered += WindowSizing.KeepInitialPositionVisible;
       this.InitializeComponent();
     }
   }

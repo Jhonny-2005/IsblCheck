@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using IsblCheck.BaseRules.Properties;
 using IsblCheck.Core.Checker;
@@ -48,7 +48,10 @@ namespace IsblCheck.BaseRules.Functions
       var function = context.Development.Functions
         .FirstOrDefault(f => string.Equals(f.Name, document.ComponentName, StringComparison.OrdinalIgnoreCase));
       if(function != null && string.IsNullOrWhiteSpace(function.Help) && string.IsNullOrWhiteSpace(function.Comment))
-        report.AddWarning(Code, Resources.NoFunctionHelp, document, new TextPosition());
+        report.Add(Severity.Information, Code, "Справка и комментарий функции не заполнены.", document,
+          new TextPosition { Line = 1, Column = 0, StartIndex = 0, EndIndex = 0 }, new DiagnosticRecommendation(
+            "Опишите в карточке функции назначение, типы и значения по умолчанию для параметров, возвращаемое значение, изменения данных и исключения, важные для вызывающего кода.",
+            "Сверьте описание с сигнатурой и проверьте один типовой вызов и один особый случай, описанный в справке."));
     }
 
     #endregion

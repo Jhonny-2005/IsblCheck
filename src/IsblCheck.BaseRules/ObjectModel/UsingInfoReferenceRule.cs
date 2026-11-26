@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Antlr4.Runtime.Tree;
 using IsblCheck.BaseRules.Properties;
@@ -48,6 +48,14 @@ namespace IsblCheck.BaseRules.ObjectModel
         if (context.identifier().GetText().Equals(ReferenceProperty,StringComparison.OrdinalIgnoreCase) &&
           context.parameterList() == null)
         {
+          var parent = context.Parent;
+          var index = 0;
+          while (index < parent.ChildCount && parent.GetChild(index) != context) index++;
+          if (index < 2) return;
+          var receiver = parent.GetChild(index - 2);
+          var receiverName = receiver is IsblParser.InvocationCallContext call
+            ? call.identifier().GetText() : receiver.GetText();
+          if (!receiverName.Equals("Info", StringComparison.OrdinalIgnoreCase)) return;
           ContextWithInvocationErrors.Add(context);
         }
       }
@@ -85,9 +93,11 @@ namespace IsblCheck.BaseRules.ObjectModel
 
       foreach (var contextWithError in listContextsWithError)
       {
-        report.AddWarning(Code,
-          string.Format(Resources.UsingInfoReferenceRule, contextWithError.identifier().GetText()),
-          document, contextWithError.GetTextPosition());
+        report.Add(Severity.Information, Code,
+          Resources.UsingInfoReferenceRule,
+          document, contextWithError.GetTextPosition(), new DiagnosticRecommendation(
+            "Определите фактический тип Info и ожидаемый результат. Если нужен объект конкретной записи, используйте документированный для этого типа способ привязки к записи с её идентификатором.",
+            "Проверьте выбор записи по идентификатору, случай отсутствующей записи и выполнение с рабочими правами доступа."));
       }
     }
 

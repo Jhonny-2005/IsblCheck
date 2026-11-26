@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using IsblCheck.Common.Dialogs;
 using IsblCheck.Common.Windows;
 

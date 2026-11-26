@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
@@ -37,7 +38,7 @@ namespace IsblCheck.BaseRules.Functions
     /// Инфо правила.
     /// </summary>
     private static readonly Lazy<IRuleInfo> info = new Lazy<IRuleInfo>(() =>
-      new RuleInfo(typeof(ExceptionClassNotSpecifiedRule).Name, Resources.ExceptionClassNotSpecifiedRuleDescription), true);
+      new RuleInfo(typeof(ExceptionClassNotSpecifiedRule).Name, "Пустое имя исключения в CreateException."), true);
 
     /// <summary>
     /// Инфо правила.
@@ -51,15 +52,17 @@ namespace IsblCheck.BaseRules.Functions
     private class ExceptionClassNotSpecifiedRuleListener : IsblBaseListener
     {
       public List<ParserRuleContext> EmptyExceptionClassParams { get; } = new List<ParserRuleContext>();
+      public IContext Context;
 
       #region IsblBaseListener
 
       public override void EnterFunction([NotNull] IsblParser.FunctionContext context)
       {
         var functionName = context.identifier().GetText();
-        if (!string.Equals(functionName, CreateExceptionFunctionName))
+        if (!string.Equals(functionName, CreateExceptionFunctionName, StringComparison.OrdinalIgnoreCase) ||
+            Context.HasUserFunction(functionName))
           return;
-        var functionParams = context.parameterList()?.expression();
+        var functionParams = ParameterListParser.GetExpressions(context.parameterList());
         if (functionParams == null)
           return;
         if (functionParams.Length == 0)
@@ -80,7 +83,8 @@ namespace IsblCheck.BaseRules.Functions
       /// <returns>Строковая константа, либо null, если выражение не является строкой.</returns>
       private static string GetStringOperandValue(IsblParser.ExpressionContext expression)
       {
-        return expression.operand()?.@string()?.GetText().Trim('\'', '"');
+        var text = expression?.operand()?.@string()?.GetText();
+        return text == null ? null : text.Substring(1, text.Length - 2);
       }
     }
 
@@ -92,11 +96,14 @@ namespace IsblCheck.BaseRules.Functions
     {
       var tree = document.GetSyntaxTree();
       var walker = new ParseTreeWalker();
-      var listener = new ExceptionClassNotSpecifiedRuleListener();
+      var listener = new ExceptionClassNotSpecifiedRuleListener { Context = context };
       walker.Walk(listener, tree);
       foreach (var emptyExceptionClassParam in listener.EmptyExceptionClassParams)
       {
-        report.AddInformation(Code, Resources.ExceptionClassNotSpecified, document, emptyExceptionClassParam.GetTextPosition());
+        report.Add(Severity.Information, Code, "В CreateException передано пустое имя исключения. Имя важно, если обработчик различает причины по этому признаку.",
+          document, emptyExceptionClassParam.GetTextPosition(), new DiagnosticRecommendation(
+            "Посмотрите обработчики, которые получают это исключение. Если они различают ошибки по имени, укажите стабильное имя и согласуйте его с обработчиками. Сохраните назначение параметров сообщения и категории.",
+            "Вызовите исключение в тестовом сценарии и проверьте, что его получает ожидаемый обработчик и журнал содержит нужный контекст."));
       }
     }
 

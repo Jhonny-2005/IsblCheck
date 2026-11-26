@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -151,7 +151,7 @@
     <value>Ошибка форматирования строки. Не найден аргумент для описателя "{0}" (ожидается аргумент с индексом {1}). Шаблон строки: "{2}".</value>
   </data>
   <data name="RedutantFormatArgument" xml:space="preserve">
-    <value>Для аргумента "{0}" с индексом {1} не найден соответствующий описатель. Шаблон строки: "{2}".</value>
+    <value>Для аргумента "{0}" с индексом {1} не найден соответствующий описатель. Проверьте индексы в шаблоне и его переводах. Если удаляете аргумент, учтите сдвиг последующих индексов и побочные эффекты его вычисления. Шаблон строки: "{2}".</value>
   </data>
   <data name="SingleFormatArgumentRuleDescription" xml:space="preserve">
     <value>Правило для обнаружения вызовов функций Format, LoadStringFormat, в которые передаётся одно значение через ArrayOf</value>
@@ -211,7 +211,7 @@
     <value>Правило использования свойства Info.Reference.</value>
   </data>
   <data name="UsingInfoReferenceRule" xml:space="preserve">
-    <value>Использование свойства Info.Reference нежелательно, это свойство не всегда указывает на верную запись.</value>
+    <value>Найдено обращение к Info.Reference. Если оно должно вернуть конкретную запись, сверьте тип Info и контракт свойства в установленной версии Directum.</value>
   </data>
   <data name="InteractiveWindowsOnEvents" xml:space="preserve">
     <value>В событии "{0}" не рекомендуется использовать функции, выводящие диалоговые окна.</value>
@@ -227,5 +227,38 @@
   </data>
   <data name="InteractiveWindowsOnStronglyNumerationReferenceEvents" xml:space="preserve">
     <value>В событии "{0}" справочника со строгой нумерацией нельзя использовать функции, выводящие диалоговые окна.</value>
+  </data>
+  <data name="SqlInjectionRiskRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения потенциальных SQL-инъекций.</value>
+  </data>
+  <data name="EmptyCatchBlockRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения пустых блоков обработки исключений.</value>
+  </data>
+  <data name="HardcodedPasswordRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения захардкоженных паролей.</value>
+  </data>
+  <data name="DeprecatedFunctionRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения использования устаревших функций ISBL.</value>
+  </data>
+  <data name="InfiniteLoopRiskRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения возможных бесконечных циклов.</value>
+  </data>
+  <data name="UnusedFunctionParamsRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения неиспользуемых параметров функций.</value>
+  </data>
+  <data name="MagicNumbersRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения «магических» чисел в коде.</value>
+  </data>
+  <data name="DeepNestingRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения чрезмерной вложенности блоков кода.</value>
+  </data>
+  <data name="EmptyStringComparisonRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения сравнений с пустой строкой.</value>
+  </data>
+  <data name="ReturnValueNotCheckedRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения неиспользуемых возвращаемых значений.</value>
+  </data>
+  <data name="DeadCodeAfterExitRuleDescription" xml:space="preserve">
+    <value>Правило обнаружения недостижимого кода после операторов выхода.</value>
   </data>
 </root>

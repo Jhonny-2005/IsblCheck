@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -44,6 +44,7 @@ namespace IsblCheck.BaseRules.Functions
     /// </summary>
     public void Parse()
     {
+      this.ParameterValues.Clear();
       var currentIndex = 0;
       var isEmpty = true;
       for (var i = 0; i < this.parameterList.ChildCount; i++)
@@ -72,6 +73,15 @@ namespace IsblCheck.BaseRules.Functions
       {
         this.ParameterValues.Add(new ParameterValue { Index = currentIndex });
       }
+    }
+
+    // expression() omits empty arguments; preserve their positions for ISBL's optional slots.
+    public static IsblParser.ExpressionContext[] GetExpressions(IsblParser.ParameterListContext parameters)
+    {
+      if (parameters == null) return Array.Empty<IsblParser.ExpressionContext>();
+      var parser = new ParameterListParser(parameters);
+      parser.Parse();
+      return parser.ParameterValues.ConvertAll(p => p.Context as IsblParser.ExpressionContext).ToArray();
     }
 
     private static bool IsComma(IParseTree node)

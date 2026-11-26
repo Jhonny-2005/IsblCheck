@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Misc;
@@ -13,7 +13,7 @@ using IsblCheck.Core.Rules;
 namespace IsblCheck.BaseRules.LogicalExpressions
 {
   /// <summary>
-  /// Правило о том, что нельзя использовать константы True и False в логическом выражении.
+  /// Подсказка о прямом сравнении значения Variant с True или False.
   /// </summary>
   public class UsingTrueFalseKeywordsRule : AbstractRule
   {
@@ -50,15 +50,14 @@ namespace IsblCheck.BaseRules.LogicalExpressions
 
       #region IsblBaseListener
 
-      public override void EnterVariable([NotNull] IsblParser.VariableContext context)
+      public override void EnterExpression([NotNull] IsblParser.ExpressionContext context)
       {
-        if (!IsTrueFalseConstant(context.GetText()))
+        if (context.EQ() == null && context.NEQ() == null)
           return;
 
-        if(IsVariableUsedAsArgument(context))
-        {
-          Entries.Add(context);
-        }
+        var constant = GetConstant(context.expression(0)) ?? GetConstant(context.expression(1));
+        if (constant != null)
+          Entries.Add(constant);
       }
 
       #endregion
@@ -69,33 +68,14 @@ namespace IsblCheck.BaseRules.LogicalExpressions
                string.Equals(constName, FalseConstant, StringComparison.OrdinalIgnoreCase);
       }
 
-      /// <summary>
-      /// Проверить, что переменная используется как аргумент в выражении.
-      /// </summary>
-      /// <param name="context">Контекст переменной.</param>
-      private static bool IsVariableUsedAsArgument(IsblParser.VariableContext context)
+      private static IsblParser.VariableContext GetConstant(IsblParser.ExpressionContext expression)
       {
-        // Считаем, что переменная используется в логическом выражении, если
-        // она используется не только как операнд
-        // (то есть используется вместе с оператором или другим выражением).
-        var parent = context.Parent;
-        while (parent != null)
-        {
-          if (parent is IsblParser.ExpressionContext expression)
-          {
-            if (expression.ChildCount > 1)
-            {
-              return true;
-            }
-          }
-          else
-          {
-            if (!(parent is IsblParser.OperandContext))
-              return false;
-          }
-          parent = parent.Parent;
-        }
-        return false;
+        while (expression?.operand()?.expression() is { } inner)
+          expression = inner;
+        var operand = expression?.operand();
+        return operand?.variable() is { } variable && operand.indexer() == null &&
+          operand.POINTER() == null && operand.invocationCall().Length == 0 &&
+          IsTrueFalseConstant(variable.GetText()) ? variable : null;
       }
     }
 
@@ -109,7 +89,10 @@ namespace IsblCheck.BaseRules.LogicalExpressions
       walker.Walk(listener, tree);
       foreach (var entry in listener.Entries)
       {
-        report.AddWarning(Code, Resources.UsingTrueFalseKeywords, document, entry.GetTextPosition());
+        report.Add(Severity.Information, Code, "Прямое сравнение с True/False. Применимость упрощения зависит от типа второго операнда.", document, entry.GetTextPosition(),
+          new DiagnosticRecommendation(
+            "Сокращайте условие только для значения, которое гарантированно логическое. Для числового или смешанного Variant сохраните явную проверку, если она выражает требуемый контракт. Не заменяйте True числом 1.",
+            "Сравните результат исходного и изменённого условия для True, False и допустимых не-логических значений, включая NULL, если он возможен."));
       }
     }
 

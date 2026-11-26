@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -60,6 +60,7 @@ namespace IsblCheck.Context.Application
       "ReportName",
       "Reports",
       "Result",
+      "Результат",
       "Scripts",
       "Searches",
       "SelectedAttachments",
@@ -81,6 +82,7 @@ namespace IsblCheck.Context.Application
       "ИмяОтчета",
       "РеквЗнач"
     };
+    private static readonly HashSet<string> predefinedNames = new HashSet<string>(predefindedVariable, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Список устаревших наименований справочников.
@@ -140,7 +142,7 @@ namespace IsblCheck.Context.Application
     /// <returns>Признак существования.</returns>
     public bool IsExistConstant(string name)
     {
-      return this.Constants.Keys.Any(c => c.Equals(name, StringComparison.OrdinalIgnoreCase));
+      return name != null && this.Constants.ContainsKey(name);
     }
 
     /// <summary>
@@ -150,13 +152,7 @@ namespace IsblCheck.Context.Application
     /// <returns>Значение константы.</returns>
     public string GetConstantValue(string name)
     {
-      if (!this.IsExistConstant(name))
-        return null;
-
-      return this.Constants
-        .FirstOrDefault(p => p.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
-        .Value
-        .ToString();
+      return name != null && this.Constants.TryGetValue(name, out var value) ? value?.ToString() : null;
     }
 
     /// <summary>
@@ -166,10 +162,7 @@ namespace IsblCheck.Context.Application
     /// <returns>Признак существования.</returns>
     public bool IsExistPredefinedVariable(string name)
     {
-      if (name[0] == '!')
-        name = name.Substring(1);
-
-      return this.PredefinedVariables.Any(v => v.Equals(name, StringComparison.OrdinalIgnoreCase));
+      return !string.IsNullOrEmpty(name) && predefinedNames.Contains(name[0] == '!' ? name.Substring(1) : name);
     }
 
     /// <summary>
@@ -179,7 +172,7 @@ namespace IsblCheck.Context.Application
     /// <returns>Признак существования.</returns>
     public bool IsExistEnumValue(string name)
     {
-      return this.Enums.Keys.Any(c => c.Equals(name, StringComparison.OrdinalIgnoreCase));
+      return name != null && this.Enums.ContainsKey(name);
     }
 
     /// <summary>
@@ -240,16 +233,16 @@ namespace IsblCheck.Context.Application
     /// </summary>
     internal ApplicationContext()
     {
-      var assembly = Assembly.GetCallingAssembly();
+      var assembly = typeof(ApplicationContext).Assembly;
       this.Constants = typeof(Constants)
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
         .Where(f => f.IsLiteral && !f.IsInitOnly)
-        .ToDictionary(k => k.Name, v => v.GetRawConstantValue());
+        .ToDictionary(k => k.Name, v => v.GetRawConstantValue(), StringComparer.OrdinalIgnoreCase);
       this.Enums = assembly
         .GetTypes()
         .Where(t => t.Namespace.Equals("IsblCheck.Context.Application.Enums") && t.IsEnum)
         .SelectMany(e => Enum.GetValues(e).Cast<object>())
-        .ToDictionary(k => k.ToString(), v => (int)v);
+        .ToDictionary(k => k.ToString(), v => (int)v, StringComparer.OrdinalIgnoreCase);
       this.Functions = typeof(Functions)
         .GetMethods()
         .Select(ToFunction)

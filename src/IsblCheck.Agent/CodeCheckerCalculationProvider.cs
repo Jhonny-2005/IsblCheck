@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using IsblCheck.Core.Checker;
 using IsblCheck.Core.Context.Development;
@@ -33,6 +33,7 @@ namespace IsblCheck.Agent
         .Union(this.ParseScripts())
         .Union(this.ParseRouteBlocks())
         .Union(this.ParseStandardRoutes())
+        .Union(this.context.WorkflowRoles.SelectMany(role => WorkflowDocumentProvider.GetDocuments(role)))
         .Union(this.ParseWizards());
     }
 
@@ -331,6 +332,7 @@ namespace IsblCheck.Agent
             ComponentName = block.Name,
             Path = $"Events.{@event.Name}"
           };
+          WorkflowDocumentProvider.AddBlockEventContext(document, @event.Name);
           yield return document;
         }
 
@@ -349,7 +351,7 @@ namespace IsblCheck.Agent
         foreach (var isblProp in block.WorkflowBlock.IsblProperties.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
         {
           var documentName = $"Блок {block.Name}. Свойство \"{isblProp.Title}\"";
-          var document = new Document(documentName, isblProp.CalculationText)
+          var document = new Document(documentName, isblProp.CalculationText, allowExpression: true)
           {
             ComponentType = ComponentType.RouteBlock,
             ComponentName = block.Name,
@@ -362,88 +364,7 @@ namespace IsblCheck.Agent
 
     private IEnumerable<IDocument> ParseStandardRoutes()
     {
-      foreach (var route in this.context.StandardRoutes
-        .Where(r => r.State == ComponentState.Active)
-        .Where(r => r.WorkflowDescription != null))
-      {
-        #region События ТМ
-
-        foreach (var @event in route.WorkflowDescription.Events.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
-        {
-          var documentName = $"ТМ \"{route.Title}\". Событие \"{@event.Title}\"";
-          var document = new Document(documentName, @event.CalculationText)
-          {
-            ComponentType = ComponentType.StandardRoute,
-            ComponentName = route.Name,
-            Path = $"Events.{@event.Name}"
-          };
-          yield return document;
-        }
-
-        #endregion
-
-        #region Действия ТМ
-
-        foreach (var action in route.WorkflowDescription.Actions)
-        {
-          var documentName = $"ТМ \"{route.Title}\". Действие \"{action.Name}\"";
-          var document = new Document(documentName, action.CalculationText)
-          {
-            ComponentType = ComponentType.StandardRoute,
-            ComponentName = route.Name,
-            Path = $"Actions.{action.Name}"
-          };
-          yield return document;
-        }
-
-        #endregion
-
-        #region Блоки маршрута
-
-        foreach (var block in route.WorkflowDescription.Blocks)
-        {
-          var blockDescription = $"Блок \"{block.Name}\" (номер {block.Id})";
-          var fullBlockDescription = $"ТМ \"{route.Title}\". {blockDescription}";
-
-          foreach (var @event in block.Events.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
-          {
-            var documentName = $"{fullBlockDescription}. Событие \"{@event.Title}\"";
-            var document = new Document(documentName, @event.CalculationText)
-            {
-              ComponentType = ComponentType.StandardRoute,
-              ComponentName = route.Name,
-              Path = $"Blocks.{block.Id}.Events.{@event.Name}"
-            };
-            yield return document;
-          }
-
-          foreach (var action in block.Actions)
-          {
-            var documentName = $"{fullBlockDescription}. Действие \"{action.Name}\"";
-            var document = new Document(documentName, action.CalculationText)
-            {
-              ComponentType = ComponentType.StandardRoute,
-              ComponentName = route.Name,
-              Path = $"Blocks.{block.Id}.Actions.{action.Name}"
-            };
-            yield return document;
-          }
-
-          foreach (var isblProp in block.IsblProperties.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
-          {
-            var documentName = $"{fullBlockDescription}. Свойство \"{isblProp.Title}\"";
-            var document = new Document(documentName, isblProp.CalculationText)
-            {
-              ComponentType = ComponentType.StandardRoute,
-              ComponentName = route.Name,
-              Path = $"Blocks.{block.Id}.Properties.{isblProp.Name}"
-            };
-            yield return document;
-          }
-        }
-
-        #endregion
-      }
+      return this.context.StandardRoutes.SelectMany(route => WorkflowDocumentProvider.GetDocuments(route, includeScheme: true));
     }
 
     private IEnumerable<IDocument> ParseWizards()

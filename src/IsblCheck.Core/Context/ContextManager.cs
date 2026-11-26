@@ -1,5 +1,5 @@
-﻿using System;
-using Common.Logging;
+using System;
+using NLog;
 using IsblCheck.Core.Context.Application;
 using IsblCheck.Core.Context.Development;
 using IsblCheck.Core.Properties;
@@ -16,7 +16,7 @@ namespace IsblCheck.Core.Context
     /// <summary>
     /// Логгер.
     /// </summary>
-    private static readonly ILog log = LogManager.GetLogger<ContextManager>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Контекст.
@@ -125,7 +125,7 @@ namespace IsblCheck.Core.Context
       catch(Exception ex)
       {
         log.Error(Resources.ERROR_LOAD_APP_CONTEXT, ex);
-        return null;
+        throw;
       }
     }
 
@@ -147,7 +147,7 @@ namespace IsblCheck.Core.Context
       catch (Exception ex)
       {
         log.Error(Resources.ERROR_LOAD_DEV_CONTEXT, ex);
-        return null;
+        throw;
       }
     }
 

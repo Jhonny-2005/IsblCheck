@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using IsblCheck.Context.Development.Folder.ExportModels;
 using IsblCheck.Context.Development.Package.Handlers;

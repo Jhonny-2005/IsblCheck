@@ -1,4 +1,4 @@
-﻿grammar Isbl;
+grammar Isbl;
 
 @parser::header {#pragma warning disable 3021}
 @lexer::header {#pragma warning disable 3021}
@@ -73,8 +73,8 @@ fragment Я:('я'|'Я');
 WS: [ \t\r\n]+->skip;
 
 // Комментарии.
-BLOCK_COMMENT: '/*' .*? '*/'->skip;
-LINE_COMMENT: '//' ~[\r\n]*->skip;
+BLOCK_COMMENT: '/*' .*? '*/'->channel(HIDDEN);
+LINE_COMMENT: '//' ~[\r\n]*->channel(HIDDEN);
 
 // Ключевые слова.
 AND: A N D | И;
@@ -95,6 +95,11 @@ OR: O R | И Л И;
 TRY: T R Y;
 WHILE: W H I L E | П О К А;
 
+// Сочетания из других языков: отдельные токены не входят в синтаксис ISBL.
+INVALID_NEQ: '!=';
+INVALID_AND: '&&';
+INVALID_OR: '||';
+
 // Операторы.
 EQ: '=';
 NEQ: '<>';
@@ -105,9 +110,9 @@ LEQ: '<=';
 STR_EQ: '==';
 STR_NEQ: '<<>>';
 STR_GT: '>>';
-STR_GEQ: '>>=';
+STR_GEQ: '>>==';
 STR_LT: '<<';
-STR_LEQ: '<<=';
+STR_LEQ: '<<==';
 PLUS: '+';
 MINUS: '-';
 MUL: '*';
@@ -123,8 +128,8 @@ COMMA: ';';
 DOT: '.';
 
 // Литералы.
-STRINGLITERAL: '"' ~["]* '"' | '\'' ~[\']* '\'';
-NUMBERLITERAL: [0-9]+ ([.] [0-9]+ )?;
+STRINGLITERAL: '"' ~["]* '"' | '\'' ~[']* '\'';
+NUMBERLITERAL: [0-9]+ ([.] [0-9]+)? ([eE] [+-]? [0-9]+)?;
 IDENTLITERAL : ('a'..'z' | 'A'..'Z' | 'а'..'я' | 'ё' | 'А'..'Я' | 'Ё' | '!') ('a'..'z' | 'A'..'Z' | 'а'..'я' | 'ё' | 'А'..'Я' | 'Ё' | '0'..'9'| '_')*;
 
 /*******************************************************************************
@@ -165,7 +170,7 @@ ifStatement
     ;
 // Совместный цикл.
 foreachStatement
-    : FOREACH variable (IN | EQ) expression statementBlock ENDFOREACH
+    : FOREACH variable (IN | EQ) expression (COLON typedefinition)? statementBlock ENDFOREACH
     ;
 // Цикл с предусловием.
 whileStatement

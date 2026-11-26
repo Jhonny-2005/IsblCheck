@@ -1,19 +1,20 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
-using System.Data.Sql;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using Common.Logging;
+using NLog;
 using FluentValidation;
-using GalaSoft.MvvmLight.Command;
+using IsblCheck.Common.Mvvm;
+using IsblCheck.Context.Development.Database;
 using IsblCheck.Common.Localization;
 using IsblCheck.Properties;
 using IsblCheck.Services;
@@ -31,7 +32,7 @@ namespace IsblCheck.ViewModels.Dialogs
     /// <summary>
     /// Логгер.
     /// </summary>
-    private static readonly ILog log = LogManager.GetLogger<DatabaseCredentialViewModel>();
+    private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Сервис представлений.
@@ -67,6 +68,21 @@ namespace IsblCheck.ViewModels.Dialogs
     /// Признак заполнения базы данных.
     /// </summary>
     private bool isDatabasesFetched;
+    private bool connectionRequestInProgress;
+    private int connectionSettingsRevision;
+    private string connectionStatus;
+    public string ConnectionStatus
+    {
+      get => this.connectionStatus;
+      private set { this.connectionStatus = value; this.RaisePropertyChanged(); }
+    }
+    private void InvalidateDatabases()
+    {
+      this.connectionSettingsRevision++;
+      this.isDatabasesFetched = false;
+      this.databases.Clear();
+      CommandManager.InvalidateRequerySuggested();
+    }
 
     /// <summary>
     /// Представление источников баз данных.
@@ -89,6 +105,7 @@ namespace IsblCheck.ViewModels.Dialogs
         if (this.databaseSource == value)
           return;
         this.databaseSource = value;
+        this.InvalidateDatabases();
         this.RaisePropertyChanged();
         this.ValidateProperty();
       }
@@ -106,11 +123,19 @@ namespace IsblCheck.ViewModels.Dialogs
         if (this.integratedSecurity == value)
           return;
         this.integratedSecurity = value;
+        this.InvalidateDatabases();
         this.RaisePropertyChanged();
         this.ValidateProperty();
       }
     }
     private bool integratedSecurity;
+
+    public bool TrustServerCertificate
+    {
+      get => this.trustServerCertificate;
+      set { if (this.trustServerCertificate == value) return; this.trustServerCertificate = value; this.InvalidateDatabases(); this.RaisePropertyChanged(); }
+    }
+    private bool trustServerCertificate;
 
     /// <summary>
     /// Имя пользователя.
@@ -123,6 +148,7 @@ namespace IsblCheck.ViewModels.Dialogs
         if (this.userName == value)
           return;
         this.userName = value;
+        this.InvalidateDatabases();
         this.RaisePropertyChanged();
         this.ValidateProperty();
       }
@@ -140,6 +166,7 @@ namespace IsblCheck.ViewModels.Dialogs
         if (this.password == value)
           return;
         this.password = value;
+        this.InvalidateDatabases();
         this.RaisePropertyChanged();
         this.ValidateProperty();
       }
@@ -157,6 +184,7 @@ namespace IsblCheck.ViewModels.Dialogs
         if (this.database == value)
           return;
         this.database = value;
+        this.connectionSettingsRevision++;
         this.RaisePropertyChanged();
         this.ValidateProperty();
       }
@@ -238,6 +266,8 @@ namespace IsblCheck.ViewModels.Dialogs
       if (includeDataSource && !string.IsNullOrEmpty(this.Database))
         connectionStringBuilder.InitialCatalog = this.Database;
       connectionStringBuilder.IntegratedSecurity = this.IntegratedSecurity;
+      connectionStringBuilder.TrustServerCertificate = this.TrustServerCertificate;
+      connectionStringBuilder.ApplicationIntent = ApplicationIntent.ReadOnly;
 
       return connectionStringBuilder.ConnectionString;
     }
@@ -280,7 +310,7 @@ namespace IsblCheck.ViewModels.Dialogs
         this.OnErrorChanged(propertyName);
       }
 
-      var validationResult = this.validator.Validate(this, propertyName);
+      var validationResult = this.validator.Validate(this, options => options.IncludeProperties(propertyName));
       if (!validationResult.IsValid)
       {
         var errorList = validationResult.Errors
@@ -308,7 +338,7 @@ namespace IsblCheck.ViewModels.Dialogs
         this.OnErrorChanged(propertyName);
       }
 
-      var validationResult = customValidator.Validate(this);
+      var validationResult = customValidator.Validate(new ValidationContext<DatabaseCredentialViewModel>(this));
       if (!validationResult.IsValid)
       {
         foreach (var error in validationResult.Errors)
@@ -336,18 +366,11 @@ namespace IsblCheck.ViewModels.Dialogs
     private void FillDatabaseSources()
     {
       this.databaseSources.Clear();
-
-      using (var sqlSources = SqlDataSourceEnumerator.Instance.GetDataSources())
-      {
-        foreach (DataRow source in sqlSources.Rows)
-        {
-          var databaseSource = source["ServerName"].ToString();
-          var instanceName = source["InstanceName"].ToString();
-          if (!string.IsNullOrEmpty(instanceName))
-            databaseSource += '\\' + instanceName;
-          this.databaseSources.Add(databaseSource);
-        }
-      }
+      // Microsoft.Data.SqlClient removed the legacy SqlDataSourceEnumerator API.
+      // Keep common local endpoints as quick picks; the editable ComboBox accepts
+      // remote host and named-instance values directly.
+      foreach (var databaseSource in new[] { Environment.MachineName, ".", "(local)" })
+        this.databaseSources.Add(databaseSource);
 
       this.isDatabaseSourcesFetched = true;
     }
@@ -355,73 +378,68 @@ namespace IsblCheck.ViewModels.Dialogs
     /// <summary>
     /// Заполнить базы данных.
     /// </summary>
-    private void FillDatabases()
+    private async void FillDatabases()
     {
+      if (this.connectionRequestInProgress) return;
       this.ValidateForm(this.serverConnectionValidator);
-      if (this.HasErrors)
-        return;
-
+      if (this.HasErrors) return;
       var connectionString = this.GetConnectionString(includeDataSource: false);
       var credential = this.GetSqlCredential();
-
-      if (string.IsNullOrEmpty(connectionString) || credential == null)
-        return;
-
-      this.databases.Clear();
-
-      using (var sqlConnecion = new SqlConnection(connectionString, credential))
+      if (string.IsNullOrEmpty(connectionString) || (!this.IntegratedSecurity && credential == null)) return;
+      var settingsRevision = this.connectionSettingsRevision;
+      this.connectionRequestInProgress = true;
+      this.ConnectionStatus = "Подключение к серверу…";
+      CommandManager.InvalidateRequerySuggested();
+      try
       {
-        try
-        {
-          sqlConnecion.Open();
-          var databasesTable = sqlConnecion.GetSchema("Databases");
-          foreach (DataRow row in databasesTable.Rows)
-          {
-            var databaseName = row["database_name"].ToString();
-            this.databases.Add(databaseName);
-          }
-          this.isDatabasesFetched = true;
-        }
-        catch (Exception ex)
-        {
-          var message = LocalizationManager.Instance.LocalizeString("WRONG_DATABASE_CREDENTIALS");
-          log.Error(message, ex);
-          this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
-        }
+        using var connection = SqlConnectionFactory.Create(connectionString, credential);
+        await connection.OpenAsync();
+        var table = await Task.Run(() => connection.GetSchema("Databases"));
+        // Settings can change while the non-blocking request is in flight.
+        if (settingsRevision != this.connectionSettingsRevision || !string.Equals(connectionString, this.GetConnectionString(includeDataSource: false), StringComparison.Ordinal)) return;
+        this.databases.Clear();
+        foreach (DataRow row in table.Rows) this.databases.Add(row["database_name"].ToString());
+        this.isDatabasesFetched = true;
       }
+      catch (Exception ex)
+      {
+        if (settingsRevision != this.connectionSettingsRevision) return;
+        var message = LocalizationManager.Instance.LocalizeString("WRONG_DATABASE_CREDENTIALS");
+        log.Error("{0}: {1}", message, ex.GetType().Name);
+        this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
+      }
+      finally { this.connectionRequestInProgress = false; this.ConnectionStatus = null; CommandManager.InvalidateRequerySuggested(); }
     }
 
-    /// <summary>
-    /// Проверить подключение.
-    /// </summary>
-    private void TestConnection()
+    /// <summary>Проверить подключение, не блокируя интерфейс.</summary>
+    private async void TestConnection()
     {
+      if (this.connectionRequestInProgress) return;
       this.ValidateForm();
-      if (this.HasErrors)
-        return;
-
+      if (this.HasErrors) return;
       var connectionString = this.GetConnectionString();
       var credential = this.GetSqlCredential();
-
-      if (string.IsNullOrEmpty(connectionString) || credential == null)
-        return;
-
-      using (var sqlConnecion = new SqlConnection(connectionString, credential))
+      if (string.IsNullOrEmpty(connectionString) || (!this.IntegratedSecurity && credential == null)) return;
+      var settingsRevision = this.connectionSettingsRevision;
+      this.connectionRequestInProgress = true;
+      this.ConnectionStatus = "Подключение к серверу…";
+      CommandManager.InvalidateRequerySuggested();
+      try
       {
-        try
-        {
-          sqlConnecion.Open();
-
-          var message = LocalizationManager.Instance.LocalizeString("CONNECTION_SUCCESS");
-          this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Information);
-        }
-        catch (Exception ex)
-        {
-          var message = LocalizationManager.Instance.LocalizeString("WRONG_DATABASE_CREDENTIALS");
-          log.Error(message, ex);
-          this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
-        }
+        using var connection = SqlConnectionFactory.Create(connectionString, credential);
+        await connection.OpenAsync();
+        if (settingsRevision != this.connectionSettingsRevision || !string.Equals(connectionString, this.GetConnectionString(), StringComparison.Ordinal)) return;
+        var message = LocalizationManager.Instance.LocalizeString("CONNECTION_SUCCESS");
+        this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Information);
       }
+      catch (Exception ex)
+      {
+        if (settingsRevision != this.connectionSettingsRevision) return;
+        var message = LocalizationManager.Instance.LocalizeString("WRONG_DATABASE_CREDENTIALS");
+        log.Error("{0}: {1}", message, ex.GetType().Name);
+        this.viewService.ShowMessageBox(message, icon: MessageBoxImage.Error);
+      }
+      finally { this.connectionRequestInProgress = false; this.ConnectionStatus = null; CommandManager.InvalidateRequerySuggested(); }
     }
 
     #endregion
@@ -443,9 +461,9 @@ namespace IsblCheck.ViewModels.Dialogs
 
       this.FetchDatabaseSourcesCommand = new RelayCommand(this.FillDatabaseSources, () => !this.isDatabaseSourcesFetched);
       this.RefreshDatabaseSourcesCommand = new RelayCommand(this.FillDatabaseSources);
-      this.FetchDatabasesCommand = new RelayCommand(this.FillDatabases, () => !this.isDatabasesFetched);
-      this.RefreshDatabasesCommand = new RelayCommand(this.FillDatabases);
-      this.TestConnectionCommand = new RelayCommand(this.TestConnection);
+      this.FetchDatabasesCommand = new RelayCommand(this.FillDatabases, () => !this.isDatabasesFetched && !this.connectionRequestInProgress);
+      this.RefreshDatabasesCommand = new RelayCommand(this.FillDatabases, () => !this.connectionRequestInProgress);
+      this.TestConnectionCommand = new RelayCommand(this.TestConnection, () => !this.connectionRequestInProgress);
       this.LoadSettings();
     }
 

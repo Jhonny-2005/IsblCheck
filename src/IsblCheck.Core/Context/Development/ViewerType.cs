@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Core.Context.Development
+namespace IsblCheck.Core.Context.Development
 {
   /// <summary>
   /// Тип приложения просмотршика.

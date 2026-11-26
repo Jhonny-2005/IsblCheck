@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using IsblCheck.BaseRules.Properties;
 using IsblCheck.Core.Checker;
@@ -12,299 +11,189 @@ using IsblCheck.Core.Rules;
 
 namespace IsblCheck.BaseRules.Variables
 {
-  /// <summary>
-  /// Правило поиска необъявленных переменных.
-  /// </summary>
   internal class UsingNotAssignedVarRule : AbstractRule
   {
-    #region Константы
+    public static IRuleInfo Info { get; } = new RuleInfo(nameof(UsingNotAssignedVarRule), Resources.UsingNotAssignedVarRuleDescription);
 
-    /// <summary>
-    /// Код правила.
-    /// </summary>
-    private const string Code = "A001";
-
-    #endregion
-
-    #region Внутренние классы
-
-    /// <summary>
-    /// Определение переменной.
-    /// </summary>
-    private class VariableDefiniton
+    private sealed class State
     {
-      /// <summary>
-      /// Имя переменной.
-      /// </summary>
-      public string VariableName { get; set; }
-
-      /// <summary>
-      /// Переменная переобъявлена.
-      /// </summary>
-      public bool IsReinitialized { get; set; }
-
-      /// <summary>
-      /// Блок предложений.
-      /// </summary>
-      public IsblParser.StatementBlockContext StatementBlock { get; set; }
+      public HashSet<string> Definite = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      public HashSet<string> Possible = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      public State Copy() => new State { Definite = new HashSet<string>(Definite, StringComparer.OrdinalIgnoreCase), Possible = new HashSet<string>(Possible, StringComparer.OrdinalIgnoreCase) };
+      public void Assign(string name) { Definite.Add(name); Possible.Add(name); }
     }
-
-    /// <summary>
-    /// Поиск необъявленных переменных.
-    /// </summary>
-    private class NotAssignedVariablesListener : IsblBaseListener
+    private sealed class Flow
     {
-      /// <summary>
-      /// Контекст приложения и разработки
-      /// </summary>
-      private readonly IContext globalContext;
-
-      /// <summary>
-      /// Текущий документ.
-      /// </summary>
+      public State Normal;
+      public List<State> Breaks = new List<State>();
+      public HashSet<string> Possible = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    }
+    private sealed class Analysis
+    {
+      private readonly IReport report;
       private readonly IDocument document;
-
-      /// <summary>
-      /// Контекст объявленных переменных.
-      /// </summary>
-      private readonly List<VariableDefiniton> variableDefinitions = new List<VariableDefiniton>();
-
-      /// <summary>
-      /// Необъявленные переменные.
-      /// </summary>
-      public List<IsblParser.VariableContext> NotAssignedVariables { get; }
-
-      /// <summary>
-      /// Неопределенные переменные.
-      /// </summary>
-      public List<IsblParser.VariableContext> UncertainVariables { get; }
-
-      /// <summary>
-      /// Получить родительский блок предложений.
-      /// </summary>
-      /// <param name="ruleNode">Узел правил.</param>
-      /// <returns>Блок предложений.</returns>
-      private static IsblParser.StatementBlockContext GetParentStatementBlock(IRuleNode ruleNode)
+      private readonly IContext context;
+      private readonly bool exitIsBuiltIn;
+      private readonly bool raiseIsBuiltIn;
+      private readonly HashSet<int> reported = new HashSet<int>();
+      public Analysis(IReport report, IDocument document, IContext context)
       {
-        var parent = ruleNode.Parent;
-        while (parent != null)
-        {
-          if (parent is IsblParser.StatementBlockContext)
-            break;
-          parent = parent.Parent;
-        }
-        return parent as IsblParser.StatementBlockContext;
+        this.report = report;
+        this.document = document;
+        this.context = context;
+        this.exitIsBuiltIn = !HasUserFunction("Exit");
+        this.raiseIsBuiltIn = !HasUserFunction("Raise");
       }
 
-      /// <summary>
-      /// Вход в предложение объявления переменной.
-      /// </summary>
-      /// <param name="context">Контекст.</param>
-      public override void EnterDeclareVariableStatement([NotNull] IsblParser.DeclareVariableStatementContext context)
+      private bool HasUserFunction(string name) => context.HasUserFunction(name);
+      private static State Merge(IEnumerable<State> paths)
       {
-        // Первый потомок переменная.
-        var variable = context.GetChild(0) as IsblParser.VariableContext;
-        if (variable == null)
+        var states = paths.Where(s => s != null).ToList();
+        if (states.Count == 0) return null;
+        var result = states[0].Copy();
+        foreach (var state in states.Skip(1)) { result.Definite.IntersectWith(state.Definite); result.Possible.UnionWith(state.Possible); }
+        return result;
+      }
+      private void Read(IParseTree node, State state)
+      {
+        if (node == null || state == null) return;
+        if (node is IsblParser.VariableContext variable)
+        {
+          var name = variable.GetText();
+          if (!context.IsUserVariable(document, name) || state.Definite.Contains(name) || !reported.Add(variable.Start.StartIndex)) return;
+          var uncertain = state.Possible.Contains(name);
+          // The bundled platform catalog is version-dependent and incomplete. An unknown
+          // SYSREQ name may be a newer system constant or a typo; do not claim certainty.
+          var possibleSystemConstant = !uncertain && name.TrimStart('!').StartsWith("SYSREQ_", StringComparison.OrdinalIgnoreCase);
+          var description = possibleSystemConstant
+            ? $"Имя \"{name}\" не найдено в доступном каталоге. Это может быть системная константа; проверьте её в справке установленной версии Directum."
+            : uncertain
+              ? $"Переменная \"{name}\" может остаться без присваивания на некоторых путях. Проверьте ветвления и контекст вычисления."
+              : $"Для имени \"{name}\" не найдено предшествующее локальное присваивание или известное контекстное определение. Проверьте параметры, системные имена и полноту контекста.";
+          // An unknown name may come from runtime context or an incomplete platform catalog;
+          // lack of a visible definition is not proof of an interpreter error.
+          var recommendation = possibleSystemConstant
+            ? new DiagnosticRecommendation(
+              $"Сверьте написание «{name}» и наличие константы в справке версии Directum. Если имя задано верно, проверьте полноту каталога анализатора.",
+              "Повторите анализ с каталогом целевой версии и проверьте вычисление в IS-Builder.")
+            : uncertain
+              ? new DiagnosticRecommendation(
+                $"Найдите пути к чтению «{name}» без присваивания, включая пустой цикл и обработку исключения. Задайте на этих путях значение по смыслу вычисления или перенесите чтение в ветвь, где значение уже получено.",
+                "Выполните обе ветви, случай пустых данных и обработку ошибки, если эти пути есть. Проверьте, что чтение получает ожидаемое значение на каждом пути.")
+              : new DiagnosticRecommendation(
+                $"Проверьте, откуда должно поступать «{name}». Для локальной переменной добавьте присваивание до первого чтения. Для параметра или переменной события проверьте объявление и загрузите метаданные этого вычисления.",
+                "Запустите вычисление из его обычного компонента или события с типовым набором параметров и повторите анализ с доступным контекстом.");
+          report.Add(Severity.Warning, "A001",
+            description, document, variable.Start.ToTextPosition(), recommendation);
           return;
-
-        var variableName = variable.GetText();
-        var variableDefinition = this.variableDefinitions
-          .FirstOrDefault(d => d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase));
-
-        if (variableDefinition == null)
-        {
-          variableDefinition = new VariableDefiniton
-          {
-            VariableName = variableName,
-            IsReinitialized = false,
-            StatementBlock = GetParentStatementBlock(context)
-          };
-          this.variableDefinitions.Add(variableDefinition);
         }
-        else if (variableDefinition.StatementBlock == null)
-        {
-          variableDefinition.IsReinitialized = true;
-          variableDefinition.StatementBlock = GetParentStatementBlock(context);
-        }
+        for (var i = 0; i < node.ChildCount; i++) Read(node.GetChild(i), state);
       }
-
-      /// <summary>
-      /// Вход в предложение означивания.
-      /// </summary>
-      /// <param name="context">Контекст.</param>
-      public override void EnterAssignStatement([NotNull] IsblParser.AssignStatementContext context)
+      public Flow Block(IsblParser.StatementBlockContext block, State input)
       {
-        // Первый потомок переменная.
-        var variable = context.GetChild(0) as IsblParser.VariableContext;
-        if (variable == null)
-          return;
-
-        // Второй потомок знак равенства или двоеточие.
-        var eq = context.GetChild(1) as TerminalNodeImpl;
-        if (eq == null ||
-          (eq.Symbol.Type != IsblParser.EQ && 
-          eq.Symbol.Type != IsblParser.COLON))
-          return;
-
-        var variableName = variable.GetText();
-        var variableDefinition = this.variableDefinitions
-          .FirstOrDefault(d => d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase));
-
-        if (variableDefinition == null)
+        var result = new Flow { Normal = input.Copy() };
+        result.Possible.UnionWith(input.Possible);
+        for (var i = 0; i < block.ChildCount && result.Normal != null; i++)
         {
-          variableDefinition = new VariableDefiniton
-          {
-            VariableName = variableName,
-            IsReinitialized = false,
-            StatementBlock = GetParentStatementBlock(context)
-          };
-          this.variableDefinitions.Add(variableDefinition);
+          var next = Statement(block.GetChild(i), result.Normal);
+          result.Normal = next.Normal;
+          result.Breaks.AddRange(next.Breaks);
+          result.Possible.UnionWith(next.Possible);
+          if (next.Normal != null) result.Possible.UnionWith(next.Normal.Possible);
         }
-        else if (variableDefinition.StatementBlock == null)
-        {
-          variableDefinition.IsReinitialized = true;
-          variableDefinition.StatementBlock = GetParentStatementBlock(context);
-        }
+        return result;
       }
-
-      /// <summary>
-      /// Вход в foreach.
-      /// </summary>
-      /// <param name="context">Контекст.</param>
-      public override void EnterForeachStatement([NotNull] IsblParser.ForeachStatementContext context)
+      private Flow Statement(IParseTree node, State state)
       {
-        var variable = context.GetChild(1) as IsblParser.VariableContext;
-
-        var variableName = variable.GetText();
-        var variableDefinition = this.variableDefinitions
-          .FirstOrDefault(d => d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase));
-
-        if (variableDefinition == null)
+        if (node is IsblParser.IfStatementContext conditional)
         {
-          variableDefinition = new VariableDefiniton
-          {
-            VariableName = variableName,
-            IsReinitialized = false,
-            StatementBlock = context.GetChild(4) as IsblParser.StatementBlockContext
-          };
-          this.variableDefinitions.Add(variableDefinition);
+          Read(conditional.expression(), state);
+          var yes = Block(conditional.statementBlock(0), state);
+          var no = conditional.statementBlock().Length == 2 ? Block(conditional.statementBlock(1), state) : new Flow { Normal = state.Copy() };
+          var result = new Flow { Normal = Merge(new[] { yes.Normal, no.Normal }), Breaks = yes.Breaks.Concat(no.Breaks).ToList() };
+          result.Possible.UnionWith(yes.Possible); result.Possible.UnionWith(no.Possible);
+          return result;
         }
-        else if (variableDefinition.StatementBlock == null)
+        if (node is IsblParser.WhileStatementContext loop)
         {
-          variableDefinition.IsReinitialized = true;
-          variableDefinition.StatementBlock = context.GetChild(4) as IsblParser.StatementBlockContext;
+          Read(loop.expression(), state);
+          return Loop(Block(loop.statementBlock(), state), state, consumesBreaks: false);
         }
-      }
-
-      /// <summary>
-      /// Выход из списка предложений.
-      /// </summary>
-      /// <param name="context">Контекст.</param>
-      public override void ExitStatementBlock([NotNull] IsblParser.StatementBlockContext context)
-      {
-        var variableDefinitions = this.variableDefinitions
-          .Where(d => d.StatementBlock == context)
-          .ToList();
-        foreach(var variableDefinition in variableDefinitions)
+        if (node is IsblParser.ForeachStatementContext each)
         {
-          if (variableDefinition.IsReinitialized)
+          Read(each.expression(), state); // The iterator does not exist while evaluating the collection.
+          var bodyInput = state.Copy(); bodyInput.Assign(each.variable().GetText());
+          return Loop(Block(each.statementBlock(), bodyInput), state, consumesBreaks: true);
+        }
+        if (node is IsblParser.TryStatementContext attempt)
+        {
+          var body = Block(attempt.statementBlock(0), state);
+          var exceptional = state.Copy(); exceptional.Possible.UnionWith(body.Possible);
+          if (attempt.EXCEPT() != null)
           {
-            variableDefinition.IsReinitialized = false;
-
-            // Переводим переменную на блок выше.
-            // TODO: Тут не ясно что делать с ForeachStatementContext и WhileStatementContext
-            // Они могут и не объявить переменную.
-            var parent = context.Parent;
-            if (parent != null && (
-              parent is IsblParser.TryStatementContext || 
-              parent is IsblParser.IfStatementContext ||
-              parent is IsblParser.ForeachStatementContext ||
-              parent is IsblParser.WhileStatementContext))
-              variableDefinition.StatementBlock = parent.Parent as IsblParser.StatementBlockContext;
-            else
-              variableDefinition.StatementBlock = null;
+            var handler = Block(attempt.statementBlock(1), exceptional);
+            var result = new Flow { Normal = Merge(new[] { body.Normal, handler.Normal }), Breaks = body.Breaks.Concat(handler.Breaks).ToList() };
+            result.Possible.UnionWith(body.Possible); result.Possible.UnionWith(handler.Possible);
+            return result;
           }
-          else
-            variableDefinition.StatementBlock = null;
+          // FINALLY also executes when the body failed before completing any assignment.
+          var finalInput = Merge(new[] { exceptional, body.Normal }.Concat(body.Breaks));
+          var final = Block(attempt.statementBlock(1), finalInput);
+          State Transfer(State path)
+          {
+            if (path == null || final.Normal == null) return null;
+            var output = path.Copy();
+            output.Definite.UnionWith(final.Normal.Definite.Except(finalInput.Definite));
+            output.Possible.UnionWith(final.Normal.Possible);
+            return output;
+          }
+          var finalResult = new Flow { Normal = Transfer(body.Normal), Breaks = body.Breaks.Select(Transfer).Where(s => s != null).Concat(final.Breaks).ToList() };
+          finalResult.Possible.UnionWith(body.Possible); finalResult.Possible.UnionWith(final.Possible);
+          return finalResult;
         }
+        if (node is IsblParser.ExitforStatementContext)
+          return new Flow { Breaks = new List<State> { state.Copy() } };
+        if (node is IsblParser.DeclareVariableStatementContext declaration)
+          state.Assign(declaration.variable().GetText());
+        else if (node is IsblParser.AssignStatementContext assignment)
+        {
+          if (assignment.variable() != null && assignment.indexer() == null && assignment.invocationCall().Length == 0)
+          {
+            Read(assignment.expression(), state);
+            state.Assign(assignment.variable().GetText());
+          }
+          else Read(assignment, state); // A member/index write needs an existing receiver.
+        }
+        else
+        {
+          Read(node, state);
+          if (node is IsblParser.InvokeStatementContext invoke && invoke.invocationCall().Length == 0)
+          {
+            var name = invoke.function()?.identifier().GetText();
+            if ((exitIsBuiltIn && string.Equals(name, "Exit", StringComparison.OrdinalIgnoreCase)) ||
+                (raiseIsBuiltIn && string.Equals(name, "Raise", StringComparison.OrdinalIgnoreCase)))
+              return new Flow();
+          }
+        }
+        return new Flow { Normal = state };
       }
-
-      /// <summary>
-      /// Вход в переменную.
-      /// </summary>
-      /// <param name="context">Контекст.</param>
-      public override void EnterVariable([NotNull] IsblParser.VariableContext context)
+      private static Flow Loop(Flow body, State input, bool consumesBreaks)
       {
-        var variableName = context.GetText();
-
-        // Проверить, что переменная не константа
-        if (!globalContext.IsUserVariable(this.document, variableName))
-          return;
-
-        var variableDefinition = this.variableDefinitions
-          .FirstOrDefault(d => d.VariableName.Equals(variableName, StringComparison.OrdinalIgnoreCase));
-        if (variableDefinition == null)
-          this.NotAssignedVariables.Add(context);
-        else if (variableDefinition.StatementBlock == null)
-          this.UncertainVariables.Add(context);
+        // A WHILE may enclose EXITFOR, but only a FOREACH consumes that exit.
+        var normalPaths = new[] { input, body.Normal }.AsEnumerable();
+        if (consumesBreaks) normalPaths = normalPaths.Concat(body.Breaks);
+        var result = new Flow { Normal = Merge(normalPaths) };
+        if (!consumesBreaks) result.Breaks.AddRange(body.Breaks);
+        result.Possible.UnionWith(body.Possible);
+        return result;
       }
-
-      /// <summary>
-      /// Конструктор.
-      /// </summary>
-      /// <param name="globalContext">Глобальный контекст.</param>
-      /// <param name="document">Проверяемый документ.</param>
-      public NotAssignedVariablesListener(IContext globalContext, IDocument document) 
+      public void Run(IParseTree tree)
       {
-        this.globalContext = globalContext;
-        this.document = document;        
-
-        this.NotAssignedVariables = new List<IsblParser.VariableContext>();
-        this.UncertainVariables = new List<IsblParser.VariableContext>();
+        if (tree is IsblParser.StatementBlockContext block) Block(block, new State());
+        else Read(tree, new State());
       }
     }
-
-    #endregion
-
-    #region Поля и свойства
-
-    /// <summary>
-    /// Инфо правила.
-    /// </summary>
-    private static readonly Lazy<IRuleInfo> info = new Lazy<IRuleInfo>(() => 
-      new RuleInfo(typeof(UsingNotAssignedVarRule).Name, Resources.UsingNotAssignedVarRuleDescription), true);
-
-    /// <summary>
-    /// Инфо правила.
-    /// </summary>
-    public static IRuleInfo Info => info.Value;
-
-    #endregion
-
-    #region Методы
-
-    /// <summary>
-    /// Применить правило.
-    /// </summary>
-    /// <param name="report">Отчет.</param>
-    /// <param name="document">Документ.</param>
-    /// <param name="context">Контекст.</param>
-    public override void Apply(IReport report, IDocument document, IContext context)
-    {
-      var tree = document.GetSyntaxTree();
-      var walker = new ParseTreeWalker();
-      var listener = new NotAssignedVariablesListener(context, document);
-      walker.Walk(listener, tree);
-
-      foreach (var notAssignedVariable in listener.NotAssignedVariables)
-        report.AddError(Code, string.Format(Resources.UsingNotAssignedVariable, notAssignedVariable.GetText()),
-          document, notAssignedVariable.Start.ToTextPosition());
-
-      foreach (var uncertainVariable in listener.UncertainVariables)
-        report.AddWarning(Code, string.Format(Resources.VariableCanHasUncertainedValue, uncertainVariable.GetText()),
-          document, uncertainVariable.Start.ToTextPosition());
-    }
-
-    #endregion
+    public override void Apply(IReport report, IDocument document, IContext context) =>
+      new Analysis(report, document, context).Run(document.GetSyntaxTree());
   }
 }

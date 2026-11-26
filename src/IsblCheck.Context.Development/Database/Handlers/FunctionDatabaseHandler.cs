@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using IsblCheck.Core.Context.Development;
 
@@ -152,7 +152,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetFunctionQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return FunctionQuery_7_7;
       return null;
     }
@@ -163,7 +163,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetFunctionArgumentQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return FunctionArgumentQuery_7_7;
       return null;
     }

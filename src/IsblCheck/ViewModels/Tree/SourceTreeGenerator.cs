@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
@@ -111,6 +111,34 @@ namespace IsblCheck.ViewModels.Tree
       var scriptsTreeNode = GenerateScriptsNode(scripts);
       componentTypes.Add(scriptsTreeNode);
 
+      // Event metadata contains no calculation: its linked scripts are the executable documents.
+      var serverEvents = new List<ContainerTreeNode>();
+      foreach (var serverEvent in context.ServerEvents)
+      {
+        var node = new ContainerTreeNode { Title = serverEvent.Title ?? serverEvent.Name };
+        foreach (var script in scripts.Where(s => !string.IsNullOrEmpty(s.ServerEventName) && string.Equals(s.ServerEventName, serverEvent.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+          var document = new Document($"Серверное событие {serverEvent.Name}. Сценарий {script.Title}", script.CalculationText)
+          { ComponentType = ComponentType.Script, ComponentName = script.Name, Path = "Calculation" };
+          node.Items.Add(new DocumentTreeNode(document) { Title = $"Сценарий: {script.Title}" });
+        }
+        serverEvents.Add(node);
+      }
+      componentTypes.Add(new ContainerTreeNode(serverEvents) { Title = "Серверные события", IconSource = ScriptsIcon, IsItemsCountVisible = true });
+      var moduleNodes = new List<ContainerTreeNode>();
+      foreach (var module in context.Modules)
+      {
+        var node = new ContainerTreeNode { Title = string.IsNullOrWhiteSpace(module.Title) ? module.Name : $"{module.Title} ({module.Name})" };
+        foreach (var script in scripts.Where(s => !string.IsNullOrEmpty(s.ModuleName) && string.Equals(s.ModuleName, module.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+          var document = new Document($"Модуль {module.Name}. Сценарий {script.Title}", script.CalculationText)
+          { ComponentType = ComponentType.Script, ComponentName = script.Name, Path = "Calculation" };
+          node.Items.Add(new DocumentTreeNode(document) { Title = $"Сценарий: {script.Title}" });
+        }
+        moduleNodes.Add(node);
+      }
+      componentTypes.Add(new ContainerTreeNode(moduleNodes) { Title = "Модули", IconSource = FunctionsIcon, IsItemsCountVisible = true });
+
       var routeBlocks = context.RouteBlocks.Where(b => b.State == ComponentState.Active);
       var routeBlocksTreeNode = GenerateRouteBlocksNode(routeBlocks);
       componentTypes.Add(routeBlocksTreeNode);
@@ -118,6 +146,9 @@ namespace IsblCheck.ViewModels.Tree
       var standardRoutes = context.StandardRoutes.Where(r => r.State == ComponentState.Active);
       var standardRoutesTreeNode = GenerateStandardRoutesNode(standardRoutes);
       componentTypes.Add(standardRoutesTreeNode);
+      var roleNodes = context.WorkflowRoles.SelectMany(role => WorkflowDocumentProvider.GetDocuments(role))
+        .Select(document => new DocumentTreeNode(document) { Title = document.Name });
+      componentTypes.Add(new ContainerTreeNode(roleNodes) { Title = "Роли маршрутов", IconSource = FunctionsIcon, IsItemsCountVisible = true });
 
       var wizards = context.Wizards.Where(r => r.State == ComponentState.Active);
       var wizardsTreeNode = GenerateWizardsTreeNode(wizards);
@@ -656,6 +687,7 @@ namespace IsblCheck.ViewModels.Tree
             ComponentName = block.Name,
             Path = $"Events.{@event.Name}"
           };
+          WorkflowDocumentProvider.AddBlockEventContext(document, @event.Name);
 
           documentNodes.Add(new DocumentTreeNode(document) { Title = $"Событие \"{@event.Title}\"" });
         }
@@ -680,7 +712,7 @@ namespace IsblCheck.ViewModels.Tree
         foreach (var isblProp in block.WorkflowBlock.IsblProperties.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
         {
           var documentName = $"Блок {block.Name}. Свойство \"{isblProp.Title}\"";
-          var document = new Document(documentName, isblProp.CalculationText)
+          var document = new Document(documentName, isblProp.CalculationText, allowExpression: true)
           {
             ComponentType = ComponentType.RouteBlock,
             ComponentName = block.Name,
@@ -710,122 +742,10 @@ namespace IsblCheck.ViewModels.Tree
     /// <returns>Узел типовых маршрутов.</returns>
     private static ContainerTreeNode GenerateStandardRoutesNode(IEnumerable<StandardRoute> standardRoutes)
     {
-      var standardRouteNodes = new List<ContainerTreeNode>();
-      foreach (var route in standardRoutes.Where(r => r.WorkflowDescription != null))
-      {
-        var documentNodes = new List<DocumentTreeNode>();
-
-        #region События ТМ
-
-        foreach (var @event in route.WorkflowDescription.Events.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
-        {
-          var documentName = $"ТМ \"{route.Title}\". Событие \"{@event.Title}\"";
-          var document = new Document(documentName, @event.CalculationText)
-          {
-            ComponentType = ComponentType.StandardRoute,
-            ComponentName = route.Name,
-            Path = $"Events.{@event.Name}"
-          };
-
-          documentNodes.Add(new DocumentTreeNode(document) { Title = $"Событие \"{@event.Title}\"" });
-        }
-
-        #endregion
-
-        #region Действия ТМ
-
-        foreach (var action in route.WorkflowDescription.Actions)
-        {
-          var documentName = $"ТМ \"{route.Title}\". Действие \"{action.Name}\"";
-          var document = new Document(documentName, action.CalculationText)
-          {
-            ComponentType = ComponentType.StandardRoute,
-            ComponentName = route.Name,
-            Path = $"Actions.{action.Name}"
-          };
-
-          documentNodes.Add(new DocumentTreeNode(document) { Title = $"Действие \"{action.Name}\"" });
-        }
-
-        #endregion
-
-        #region Блоки маршрута
-
-        foreach (var block in route.WorkflowDescription.Blocks)
-        {
-          var blockDescription = $"Блок \"{block.Name}\" (номер {block.Id})";
-          var fullBlockDescription = $"ТМ \"{route.Title}\". {blockDescription}";
-
-          #region События блока
-          foreach (var @event in block.Events.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
-          {
-            var documentName = $"{fullBlockDescription}. Событие \"{@event.Title}\"";
-            var document = new Document(documentName, @event.CalculationText)
-            {
-              ComponentType = ComponentType.StandardRoute,
-              ComponentName = route.Name,
-              Path = $"Blocks.{block.Id}.Events.{@event.Name}"
-            };
-
-            var documentNode = new DocumentTreeNode(document)
-            {
-              Title = $"{blockDescription}. Событие \"{@event.Title}\""
-            };
-            documentNodes.Add(documentNode);
-          }
-          #endregion
-
-          #region Действия блока
-          foreach (var action in block.Actions)
-          {
-            var documentName = $"{fullBlockDescription}. Действие \"{action.Name}\"";
-            var document = new Document(documentName, action.CalculationText)
-            {
-              ComponentType = ComponentType.StandardRoute,
-              ComponentName = route.Name,
-              Path = $"Blocks.{block.Id}.Actions.{action.Name}"
-            };
-
-            var documentNode = new DocumentTreeNode(document)
-            {
-              Title = $"{blockDescription}. Действие \"{action.Name}\""
-            };
-            documentNodes.Add(documentNode);
-          }
-          #endregion
-
-          #region Вычисления свойств блока
-          foreach (var isblProp in block.IsblProperties.Where(e => !string.IsNullOrEmpty(e.CalculationText)))
-          {
-            var documentName = $"{fullBlockDescription}. Свойство \"{isblProp.Title}\"";
-            var document = new Document(documentName, isblProp.CalculationText)
-            {
-              ComponentType = ComponentType.StandardRoute,
-              ComponentName = route.Name,
-              Path = $"Blocks.{block.Id}.Properties.{isblProp.Name}"
-            };
-
-            var documentNode = new DocumentTreeNode(document)
-            {
-              Title = $"{blockDescription}. Свойство \"{isblProp.Title}\""
-            };
-            documentNodes.Add(documentNode);
-          }
-          #endregion
-        }
-
-        standardRouteNodes.Add(new ContainerTreeNode(documentNodes) { Title = route.Title });
-
-        #endregion
-      }
-
-      var rootNode = new ContainerTreeNode(standardRouteNodes)
-      {
-        TitleLocalizationKey = "STANDARD_ROUTES",
-        IconSource = StandardRoutesIcon,
-        IsItemsCountVisible = true
-      };
-      return rootNode;
+      var nodes = standardRoutes.Select(route => new ContainerTreeNode(
+        WorkflowDocumentProvider.GetDocuments(route, includeScheme: true).Select(document => new DocumentTreeNode(document) { Title = document.Name }))
+        { Title = $"{route.Title} [{route.Name}]" });
+      return new ContainerTreeNode(nodes) { TitleLocalizationKey = "STANDARD_ROUTES", IconSource = StandardRoutesIcon, IsItemsCountVisible = true };
     }
 
     /// <summary>

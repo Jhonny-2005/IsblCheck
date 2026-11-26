@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using IsblCheck.Context.Development.Utils;
 using IsblCheck.Core.Context.Development;
@@ -436,7 +436,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetDocumentCardTypeQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return DocumentCardTypeQuery_7_7;
       return null;
     }
@@ -447,7 +447,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetActionQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return ActionQuery_7_7;
       return null;
     }
@@ -458,7 +458,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetMethodsQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 55);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return MethodsQuery_7_55;
       return null;
     }
@@ -469,7 +469,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetMethodParamsQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 55);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return MethodParamsQuery_7_55;
       return null;
     }
@@ -480,7 +480,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetRequisiteQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return RequisiteQuery_7_7;
       return null;
     }
@@ -491,7 +491,7 @@ namespace IsblCheck.Context.Development.Database.Handlers
     public string GetViewQuery(Version platformVersion)
     {
       var minVersion = new Version(7, 7);
-      if (platformVersion > minVersion)
+      if (platformVersion >= minVersion)
         return ViewQuery_7_7;
       return null;
     }

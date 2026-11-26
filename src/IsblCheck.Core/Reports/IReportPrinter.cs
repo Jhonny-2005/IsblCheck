@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Core.Reports
+namespace IsblCheck.Core.Reports
 {
   /// <summary>
   /// Интерфейс принтера отчетов

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using IsblCheck.Context.Development.Package.Models;
@@ -317,7 +317,7 @@ namespace IsblCheck.Context.Development.Package.Handlers
         var nameReq = row.Requisites
           .FirstOrDefault(r => r.Code == ReqNameReqName);
         if (nameReq != null)
-          cardRequisite.Name = nameReq.DecodedText;
+          cardRequisite.Name = nameReq.StringValue;
 
         var isRequiredReq = row.Requisites
           .FirstOrDefault(r => r.Code == ReqIsRequiredReqName);

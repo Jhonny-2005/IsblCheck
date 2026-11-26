@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace IsblCheck.Core.Context.Development
 {
@@ -21,6 +21,9 @@ namespace IsblCheck.Core.Context.Development
     /// Тип базового блока.
     /// </summary>
     public RouteBlockType BaseBlockType { get; set; }
+
+    public string InputsJoinType { get; set; }
+    public Dictionary<string, string> ExecutionResults { get; } = new(System.StringComparer.Ordinal);
 
     /// <summary>
     /// События.

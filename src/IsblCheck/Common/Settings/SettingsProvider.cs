@@ -1,4 +1,4 @@
-﻿namespace IsblCheck.Common.Settings
+namespace IsblCheck.Common.Settings
 {
   /// <summary>
   /// Провайдер настроек.

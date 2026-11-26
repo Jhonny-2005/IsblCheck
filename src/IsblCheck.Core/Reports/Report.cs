@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using IsblCheck.Core.Checker;
 
@@ -7,7 +7,7 @@ namespace IsblCheck.Core.Reports
   /// <summary>
   /// Отчет проверки.
   /// </summary>
-  internal class Report : IReport
+  internal class Report : IReport, IReportCoverage, IReportRuleSelection
   {
     #region IReport
 
@@ -15,6 +15,11 @@ namespace IsblCheck.Core.Reports
     /// Сообщения.
     /// </summary>
     public IEnumerable<IReportMessage> Messages => this.messages;
+    public IEnumerable<IDocument> Documents => this.documents;
+    public bool? CanValidateReferences { get; internal set; }
+    public bool? CanValidateLocalization { get; internal set; }
+    public bool? OptionalRulesIncluded { get; internal set; }
+    internal void AddDocument(IDocument document) => this.documents.Add(document);
 
     /// <summary>
     /// Добавить ошибку.
@@ -24,7 +29,11 @@ namespace IsblCheck.Core.Reports
     /// <param name="description">Описание.</param>
     /// <param name="document">Документ.</param>
     /// <param name="position">Позиция.</param>
-    public void Add(Severity severity, string code, string description, IDocument document, TextPosition position)
+    public void Add(Severity severity, string code, string description, IDocument document, TextPosition position) =>
+      this.Add(severity, code, description, document, position, null);
+
+    public void Add(Severity severity, string code, string description, IDocument document, TextPosition position,
+      DiagnosticRecommendation recommendation)
     {
       var reportMessage = new ReportMessage
       {
@@ -32,7 +41,8 @@ namespace IsblCheck.Core.Reports
         Code = code,
         Description = description,
         Document = document,
-        Position = position
+        Position = position,
+        Recommendation = recommendation
       };
       this.messages.Add(reportMessage);
     }
@@ -90,6 +100,7 @@ namespace IsblCheck.Core.Reports
     /// Сообщения.
     /// </summary>
     private readonly ConcurrentBag<IReportMessage> messages = new ConcurrentBag<IReportMessage>();
+    private readonly ConcurrentBag<IDocument> documents = new ConcurrentBag<IDocument>();
 
     /// <summary>
     /// Принтеры.

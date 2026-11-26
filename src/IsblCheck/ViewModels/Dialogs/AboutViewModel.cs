@@ -1,5 +1,5 @@
-﻿using System.Windows.Input;
-using GalaSoft.MvvmLight.CommandWpf;
+using System.Windows.Input;
+using IsblCheck.Common.Mvvm;
 using IsblCheck.Common;
 using IsblCheck.Services;
 

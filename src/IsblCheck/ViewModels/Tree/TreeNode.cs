@@ -1,6 +1,6 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Windows.Media;
-using GalaSoft.MvvmLight;
+using IsblCheck.Common.Mvvm;
 
 namespace IsblCheck.ViewModels.Tree
 {

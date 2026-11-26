@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antlr4.Runtime;
@@ -43,6 +43,7 @@ namespace IsblCheck.BaseRules.ObjectModel
       /// Имя вызываемого метода.
       /// </summary>
       public string CallMethodName { get; set; }
+      public string CleanupMethodName { get; set; }
 
       /// <summary>
       /// Имя получаемого идентификатора состояния.
@@ -55,7 +56,7 @@ namespace IsblCheck.BaseRules.ObjectModel
       public ParserRuleContext StatementContext { get; set; }
     }
 
-    /// <summary>asdfasdfasdf
+    /// <summary>
     /// Поиск объектов с незавершенным состоянием, открываемые метод с параметром.
     /// </summary>
     private class CallMethodsWithSaveStateListener : IsblBaseListener
@@ -136,6 +137,7 @@ namespace IsblCheck.BaseRules.ObjectModel
           var objectStateDefinition = new ObjectStateDefinition
           {
             CallMethodName = callMethodName,
+            CleanupMethodName = callMethods.First(pair => pair.Key.Equals(callMethodName, StringComparison.OrdinalIgnoreCase)).Value,
             InvokerName = invokerName,
             IdentifierStateName = identifierStateName,
             StatementContext = assingStatement
@@ -169,12 +171,12 @@ namespace IsblCheck.BaseRules.ObjectModel
 
           var identifierStateName = identifierState.GetText();
 
-          var objectStateDefinitions = this.NotRestoredObjectDefinitions
-            .Where(d => d.CallMethodName.Equals(openMethodName, StringComparison.OrdinalIgnoreCase) &&
+          var objectStateDefinition = this.NotRestoredObjectDefinitions
+            .LastOrDefault(d => d.CallMethodName.Equals(openMethodName, StringComparison.OrdinalIgnoreCase) &&
               d.InvokerName.Equals(invokerName, StringComparison.OrdinalIgnoreCase) &&
-              d.IdentifierStateName.Equals(identifierStateName, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-          foreach (var objectStateDefinition in objectStateDefinitions)
+              d.IdentifierStateName.Equals(identifierStateName, StringComparison.OrdinalIgnoreCase) &&
+              !InOppositeBranches(d.StatementContext, invokeStatement));
+          if (objectStateDefinition != null)
             this.NotRestoredObjectDefinitions.Remove(objectStateDefinition);
         }
       }
@@ -185,6 +187,7 @@ namespace IsblCheck.BaseRules.ObjectModel
     /// </summary>
     private class CallMethodsWithoutSaveStateListener : IsblBaseListener
     {
+      public IContext Context;
       /// <summary>
       /// Определения объектов с не восстановленным состоянием.
       /// </summary>
@@ -232,7 +235,7 @@ namespace IsblCheck.BaseRules.ObjectModel
         }
       }
 
-      private static bool IsAssignedFromCreateCachedReferenceFunctionCall(IsblParser.AssignStatementContext context)
+      private bool IsAssignedFromCreateCachedReferenceFunctionCall(IsblParser.AssignStatementContext context)
       {
         if (context.expression()?.operand()?.ChildCount != 1)
           return false;
@@ -242,8 +245,9 @@ namespace IsblCheck.BaseRules.ObjectModel
           return false;
 
         var functionName = function.identifier().GetText();
-        return functionName.Equals("CreateCachedReference", StringComparison.OrdinalIgnoreCase) ||
-               functionName.Equals("СоздатьКэшированныйСправочник", StringComparison.OrdinalIgnoreCase);
+        return (functionName.Equals("CreateCachedReference", StringComparison.OrdinalIgnoreCase) ||
+                functionName.Equals("СоздатьКэшированныйСправочник", StringComparison.OrdinalIgnoreCase)) &&
+          !Context.HasUserFunction(functionName);
       }
 
       public override void EnterInvocationCall(IsblParser.InvocationCallContext context)
@@ -274,12 +278,17 @@ namespace IsblCheck.BaseRules.ObjectModel
 
         if (isOpenMethod)
         {
+          // A checkpoint on the same Events collection captures the prior state;
+          // ReleaseCheckPoint restores it, so DisableAll does not need a separate EnableAll.
+          var restoredByCheckpoint = callMethodName.Equals("DisableAll", StringComparison.OrdinalIgnoreCase) &&
+            HasActiveCheckpointBefore(invokeStatement, invokerName);
           var isCachedReference = this.cachedReferenceVariableNames.Contains(invokerName);
-          if (!isCachedReference || !callMethodName.Equals("Open", StringComparison.OrdinalIgnoreCase))
+          if (!restoredByCheckpoint && (!isCachedReference || !callMethodName.Equals("Open", StringComparison.OrdinalIgnoreCase)))
           {
             var objectStateDefinition = new ObjectStateDefinition
             {
               CallMethodName = callMethodName,
+              CleanupMethodName = complementMethodNames.First(pair => pair.Key.Equals(callMethodName, StringComparison.OrdinalIgnoreCase)).Value,
               InvokerName = invokerName,
               StatementContext = invokeStatement
             };
@@ -294,15 +303,77 @@ namespace IsblCheck.BaseRules.ObjectModel
 
           var objectStateDefinitions = this.NotRestoredObjectDefinitions
             .Where(d => d.CallMethodName.Equals(openMethodName, StringComparison.OrdinalIgnoreCase) &&
-                        d.InvokerName.Equals(invokerName, StringComparison.OrdinalIgnoreCase))
+                        d.InvokerName.Equals(invokerName, StringComparison.OrdinalIgnoreCase) &&
+                        !InOppositeBranches(d.StatementContext, invokeStatement))
             .ToList();
           foreach (var objectStateDefinition in objectStateDefinitions)
             this.NotRestoredObjectDefinitions.Remove(objectStateDefinition);
         }
       }
+
+      private static bool HasActiveCheckpointBefore(IsblParser.InvokeStatementContext statement, string invokerName)
+      {
+        for (IParseTree node = statement; node != null; node = node.Parent)
+        {
+          if (node.Parent is not IsblParser.StatementBlockContext block) continue;
+          var index = -1;
+          for (var i = 0; i < block.ChildCount; i++)
+            if (ReferenceEquals(block.GetChild(i), node)) { index = i; break; }
+          if (index < 0) continue;
+          for (var i = index - 1; i >= 0; i--)
+          {
+            var prior = block.GetChild(i);
+            if (prior is IsblParser.InvokeStatementContext priorCall && TryGetCheckpointUse(priorCall.invocationCall().LastOrDefault(), out var method, out var priorInvoker) &&
+                string.Equals(invokerName, priorInvoker, StringComparison.OrdinalIgnoreCase))
+            {
+              if (method.Equals("AddCheckPoint", StringComparison.OrdinalIgnoreCase)) return true;
+              if (method.Equals("ReleaseCheckPoint", StringComparison.OrdinalIgnoreCase)) return false;
+            }
+            if (ContainsCheckpointUse(prior, invokerName)) return false;
+          }
+        }
+        return false;
+      }
+
+      private static bool ContainsCheckpointUse(IParseTree node, string invokerName)
+      {
+        if (node is IsblParser.InvocationCallContext call && TryGetCheckpointUse(call, out _, out var receiver) &&
+            string.Equals(invokerName, receiver, StringComparison.OrdinalIgnoreCase)) return true;
+        for (var i = 0; i < node.ChildCount; i++)
+          if (ContainsCheckpointUse(node.GetChild(i), invokerName)) return true;
+        return false;
+      }
+
+      private static bool TryGetCheckpointUse(IsblParser.InvocationCallContext context, out string method, out string invoker)
+      {
+        method = null;
+        invoker = null;
+        if (context?.Parent is not IsblParser.InvokeStatementContext statement) return false;
+        method = context.GetChild<IsblParser.IdentifierContext>(0)?.GetText();
+        if (!string.Equals(method, "AddCheckPoint", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(method, "ReleaseCheckPoint", StringComparison.OrdinalIgnoreCase)) return false;
+        var prefix = statement.children.TakeWhile(child => child != context).Select(child => child.GetText()).ToArray();
+        if (prefix.Length == 0) return false;
+        invoker = string.Concat(prefix);
+        if (invoker.EndsWith(".", StringComparison.Ordinal)) invoker = invoker.Substring(0, invoker.Length - 1);
+        return true;
+      }
     }
 
     #endregion
+
+    private static bool InOppositeBranches(IParseTree acquisition, IParseTree cleanup)
+    {
+      var cleanupBranches = new Dictionary<IsblParser.IfStatementContext, IsblParser.StatementBlockContext>();
+      for (var node = cleanup; node != null; node = node.Parent)
+        if (node is IsblParser.StatementBlockContext block && block.Parent is IsblParser.IfStatementContext condition)
+          cleanupBranches.Add(condition, block);
+      for (var node = acquisition; node != null; node = node.Parent)
+        if (node is IsblParser.StatementBlockContext block && block.Parent is IsblParser.IfStatementContext condition &&
+            cleanupBranches.TryGetValue(condition, out var cleanupBlock) && !ReferenceEquals(block, cleanupBlock))
+          return true;
+      return false;
+    }
 
     #region Поля
 
@@ -332,14 +403,13 @@ namespace IsblCheck.BaseRules.ObjectModel
       var tree = document.GetSyntaxTree();
       var walker = new ParseTreeWalker();
       var paramListener = new CallMethodsWithSaveStateListener();
-      var noParamListener = new CallMethodsWithoutSaveStateListener();
+      var noParamListener = new CallMethodsWithoutSaveStateListener { Context = context };
 
       walker.Walk(paramListener, tree);
 
       foreach (var notRestoredObjectDefinition in paramListener.NotRestoredObjectDefinitions)
       {
-        report.AddWarning(Code, string.Format(Resources.ObjectDoesNotRestoreSelfStatus, notRestoredObjectDefinition.InvokerName),
-          document, notRestoredObjectDefinition.StatementContext.GetTextPosition());
+        AddFinding(report, document, notRestoredObjectDefinition);
       }
 
 
@@ -347,9 +417,21 @@ namespace IsblCheck.BaseRules.ObjectModel
 
       foreach (var notRestoredObjectDefinition in noParamListener.NotRestoredObjectDefinitions)
       {
-        report.AddWarning(Code, string.Format(Resources.ObjectDoesNotRestoreSelfStatus, notRestoredObjectDefinition.InvokerName),
-          document, notRestoredObjectDefinition.StatementContext.GetTextPosition());
+        AddFinding(report, document, notRestoredObjectDefinition);
       }
+    }
+
+    private static void AddFinding(IReport report, IDocument document, ObjectStateDefinition state)
+    {
+      var receiver = state.InvokerName;
+      var cleanup = $"{receiver}.{state.CleanupMethodName}({state.IdentifierStateName})";
+      var action = state.CleanupMethodName == "EnableAll"
+        ? $"Проверьте исходное состояние «{receiver}». Для коллекции событий с поддержкой контрольных точек сохраните состояние через «{receiver}.AddCheckPoint()» до отключения и восстановите через «{receiver}.ReleaseCheckPoint()» при выходе."
+        : $"Если состояние принадлежит «{receiver}» и его надо восстановить здесь, используйте «{cleanup}» после последнего использования. Если вызов вернул отдельный объект, сверяйте очистку с его контрактом. При передаче состояния через окружение найдите парную операцию в следующем событии и проверьте тот же объект и идентификатор.";
+      report.Add(Severity.Warning, Code,
+        $"В вычислении не найдена парная операция для {state.CallMethodName} объекта \"{receiver}\". Проверьте восстановление состояния с учётом ветвлений, алиасов и других вызовов.",
+        document, state.StatementContext.GetTextPosition(), new DiagnosticRecommendation(action,
+          $"Проверьте обычный выход и исключение после «{state.CallMethodName}». Для состояния между событиями проверьте отмену и выход до следующего события. Парный вызов должен относиться к тому же объекту и выполняться только после установки состояния."));
     }
 
     #endregion

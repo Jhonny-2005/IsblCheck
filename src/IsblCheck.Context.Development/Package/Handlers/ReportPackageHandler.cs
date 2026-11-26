@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using IsblCheck.Context.Development.Package.Models;
 using IsblCheck.Core.Context.Development;
 

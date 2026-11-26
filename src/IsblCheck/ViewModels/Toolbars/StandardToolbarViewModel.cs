@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+using IsblCheck.Common.Mvvm;
 using IsblCheck.Common.Panels;
 using IsblCheck.Services;
 using IsblCheck.ViewModels.Panels;
@@ -35,6 +34,7 @@ namespace IsblCheck.ViewModels.Toolbars
     /// Команда открытия пакета.
     /// </summary>
     public ICommand OpenPackageCommand { get; private set; }
+    public ICommand OpenRouteExportCommand { get; private set; }
 
     /// <summary>
     /// Команда открытия базы данных.
@@ -173,6 +173,7 @@ namespace IsblCheck.ViewModels.Toolbars
       this.OpenPackageCommand = new RelayCommand(this.openCommandHandlers.OpenPackage);
       this.OpenDatabaseCommand = new RelayCommand(this.openCommandHandlers.OpenDatabase);
       this.OpenFolderCommand = new RelayCommand(this.openCommandHandlers.OpenFolder);
+      this.OpenRouteExportCommand = new RelayCommand(this.openCommandHandlers.OpenRouteExport);
     }
 
     #endregion

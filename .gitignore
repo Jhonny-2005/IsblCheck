@@ -11,6 +11,9 @@
 *.userprefs
 
 # Build results
+.dotnet-sdk*/
+.dotnet-cli-home/
+.dotnet-install.ps1
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/

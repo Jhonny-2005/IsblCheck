@@ -1,4 +1,4 @@
-﻿using IsblCheck.Core.Checker;
+using IsblCheck.Core.Checker;
 
 namespace IsblCheck.Core.Reports
 {
@@ -21,6 +21,8 @@ namespace IsblCheck.Core.Reports
     /// Описание.
     /// </summary>
     string Description { get; }
+
+    DiagnosticRecommendation Recommendation => null;
 
     /// <summary>
     /// Проверяемый документ.

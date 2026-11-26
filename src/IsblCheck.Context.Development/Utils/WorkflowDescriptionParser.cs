@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using IsblCheck.Core.Context.Development;
 
@@ -23,7 +25,9 @@ namespace IsblCheck.Context.Development.Utils
       ["Script"] = "Завершение выбора",
       ["TaskStart"] = "Возможность старта",
       ["TaskAbortPossibility"] = "Возможность прекращения",
-      ["TaskAbort"] = "Прекращение"
+      ["TaskAbort"] = "Прекращение",
+      ["OnTaskFormShow"] = "Показ формы-карточки",
+      ["OnTaskFormHide"] = "Скрытие формы-карточки"
     };
 
     /// <summary>
@@ -47,7 +51,8 @@ namespace IsblCheck.Context.Development.Utils
         "AfterFinish",
         "OnCreateNotices",
         "OnFormShow",
-        "OnFormHide"
+        "OnFormHide",
+        "OnPreview"
       },
       [RouteBlockType.Step] = new[]
       {
@@ -57,7 +62,8 @@ namespace IsblCheck.Context.Development.Utils
         "BeforeQueryParams",
         "AfterQueryParams",
         "OnFormShow",
-        "OnFormHide"
+        "OnFormHide",
+        "OnPreview"
       },
       [RouteBlockType.Decision] = new[]
       {
@@ -96,7 +102,8 @@ namespace IsblCheck.Context.Development.Utils
       {
         "BeforeStart",
         "AfterFinish"
-      }
+      },
+      [RouteBlockType.LifeCycleStage] = new[] { "BeforeStart", "AfterFinish" }
     };
 
     /// <summary>
@@ -112,6 +119,8 @@ namespace IsblCheck.Context.Development.Utils
     /// XML описания маршрута.
     /// </summary>
     private readonly XDocument description;
+
+    static WorkflowDescriptionParser() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
     #endregion
 
@@ -131,8 +140,83 @@ namespace IsblCheck.Context.Development.Utils
       workflowDescription.Actions.AddRange(parser.GetActions());
       workflowDescription.Blocks.AddRange(parser.GetBlocks());
       workflowDescription.Events.AddRange(parser.GetEvents());
+      workflowDescription.IsblProperties.AddRange(GetProperties(parser.description.Root.Element("Properties")));
+      parser.ReadScheme(workflowDescription);
 
       return workflowDescription;
+    }
+
+    private void ReadScheme(WorkflowDescription scheme)
+    {
+      var root = description.Root;
+      var catalog = root.Element("Params");
+      scheme.HasParameterCatalog = catalog != null && catalog.Elements().All(p => p.Name == "Param");
+      foreach (var parameter in catalog?.Elements("Param") ?? Enumerable.Empty<XElement>())
+      {
+        var values = parameter.Elements("Value");
+        var hasDefault = values.Any(value => value.Attributes().Any(a => !string.IsNullOrWhiteSpace(a.Value)) ||
+          !string.IsNullOrWhiteSpace(value.Value) || value.HasElements);
+        scheme.Parameters.Add(new WorkflowParameter((string)parameter.Attribute("Name") ?? "",
+          (string)parameter.Attribute("Type"), hasDefault));
+      }
+
+      ReadRequested(root.Element("StartedAskableParams"), "Запрос при выборе маршрута", null);
+      ReadProperties(root.Element("Properties"), null);
+      foreach (var block in root.Element("Blocks")?.Elements("Block") ?? Enumerable.Empty<XElement>())
+      {
+        var id = (string)block.Attribute("ID");
+        ReadProperties(block.Element("Properties"), id);
+        ReadRequested(block.Element("AskableParams"), $"Запрос в блоке {id}", id);
+        foreach (var result in block.Element("Results")?.Elements("Result") ?? Enumerable.Empty<XElement>())
+        {
+          var code = (string)result.Attribute("Code") ?? "";
+          ReadRequested(result.Element("AskableParams"), $"Запрос в блоке {id}, результат «{code}»", id, code);
+        }
+      }
+
+      var route = root.Element("Route");
+      scheme.HasRouteSection = route != null;
+      foreach (var link in route?.Elements("Link") ?? Enumerable.Empty<XElement>())
+      {
+        var id = (string)link.Attribute("ID") ?? "";
+        scheme.RouteBlockIds.Add(id);
+        foreach (var output in link.Element("Outputs")?.Elements("Output") ?? Enumerable.Empty<XElement>())
+          scheme.Edges.Add(new WorkflowEdge(id, (string)output.Attribute("ID") ?? "", (string)output.Attribute("ResultCode") ?? "", false));
+        foreach (var input in link.Element("Inputs")?.Elements("Input") ?? Enumerable.Empty<XElement>())
+          scheme.Edges.Add(new WorkflowEdge((string)input.Attribute("ID") ?? "", id, (string)input.Attribute("ResultCode") ?? "", true));
+      }
+
+      void ReadRequested(XElement node, string location, string blockId, string resultCode = null)
+      {
+        foreach (var item in node?.Elements("AskableParam") ?? Enumerable.Empty<XElement>())
+          scheme.ParameterBindings.Add(new WorkflowParameterBinding((string)item.Attribute("Name") ?? "",
+            location, blockId, resultCode, Requested: true,
+            Required: bool.TryParse((string)item.Attribute("Required"), out var required) && required));
+      }
+
+      void ReadProperties(XElement node, string blockId)
+      {
+        foreach (var property in node?.Elements("Property") ?? Enumerable.Empty<XElement>())
+        {
+          var title = (string)property.Attribute("Name") ?? "";
+          var location = blockId == null ? $"Свойство задачи «{title}»" : $"Блок {blockId}, свойство «{title}»";
+          // Output properties can store values in another named route parameter.
+          if ((string)property.Attribute("LinkedParam") is { Length: > 0 } linked)
+            scheme.ParameterBindings.Add(new WorkflowParameterBinding(linked, location + " (выход)", blockId, IsOutput: true));
+
+          // ValueType=1 binds a property to a parameter by name. ValueType=2 means ISBL.
+          if (!string.IsNullOrWhiteSpace(property.Element("ValueParamNames")?.Value) ||
+              property.Element("ValueParamNames")?.HasElements == true)
+            scheme.HasUnparsedBindings = true;
+          if ((string)property.Attribute("ValueType") != "1")
+            continue;
+          var value = property.Element("Value");
+          var name = (string)value?.Attribute("Value") ?? GetTextValue(value?.Element("Value")?.Value);
+          if (string.IsNullOrWhiteSpace(name))
+            continue;
+          scheme.ParameterBindings.Add(new WorkflowParameterBinding(name, location, blockId));
+        }
+      }
     }
 
     private IEnumerable<WorkflowBlock> GetBlocks()
@@ -182,7 +266,8 @@ namespace IsblCheck.Context.Development.Utils
 
     private static Core.Context.Development.Action ParseAction(XElement actionElement)
     {
-      var name = actionElement.Attribute("Code").Value;
+      var name = (string)actionElement.Attribute("Code");
+      if (string.IsNullOrWhiteSpace(name)) throw new FormatException("У действия схемы отсутствует Code.");
       var isblText = actionElement.Element("ISBLText")?.Value;
       var calculation = isblText == null ? string.Empty : DecodeMimeText(isblText);
       return new Core.Context.Development.Action
@@ -196,9 +281,13 @@ namespace IsblCheck.Context.Development.Utils
     {
       var block = new WorkflowBlock { Id = blockElement.Attribute("ID")?.Value ?? string.Empty };
 
-      if (!Enum.TryParse(blockElement.Attribute("SystemType")?.Value, out RouteBlockType baseBlockType))
+      if (!Enum.TryParse(blockElement.Attribute("SystemType")?.Value, true, out RouteBlockType baseBlockType) || !Enum.IsDefined(baseBlockType))
         baseBlockType = RouteBlockType.Unknown;
       block.BaseBlockType = baseBlockType;
+      block.InputsJoinType = (string)blockElement.Attribute("InputsJoinType");
+      foreach (var result in blockElement.Element("Results")?.Elements("Result") ?? Enumerable.Empty<XElement>())
+        if ((string)result.Attribute("Code") is { } code)
+          block.ExecutionResults.TryAdd(code, (string)result.Attribute("Name") ?? code);
 
       var properties = blockElement.Element("Properties")?.Elements("Property");
       if (properties != null)
@@ -211,8 +300,8 @@ namespace IsblCheck.Context.Development.Utils
 
         foreach (var p in properties.Where(p => p.Attribute("ValueType")?.Value == "2"))
         {
-          var propName = p.Attribute("Name").Value;
-          var propTitle = p.Attribute("Description").Value;
+          var propName = RequiredName(p, "Name");
+          var propTitle = (string)p.Attribute("Description") ?? propName;
           var calculationText = GetTextPropertyValue(p) ?? string.Empty;
           if (IsBlockEvent(propName, baseBlockType))
           {
@@ -235,7 +324,7 @@ namespace IsblCheck.Context.Development.Utils
         }
       }
 
-      var actions = blockElement.Element("Actions")?.Elements("Action");
+      var actions = blockElement.Elements().Where(e => e.Name == "Actions" || e.Name == "RouteActions").SelectMany(e => e.Elements("Action"));
       if (actions != null)
       {
         foreach (var action in actions)
@@ -252,6 +341,26 @@ namespace IsblCheck.Context.Development.Utils
       if (BlockEventNames.TryGetValue(blockType, out string[] eventNames))
         return eventNames.Contains(propertyName, StringComparer.OrdinalIgnoreCase);
       return false;
+    }
+
+    private static IEnumerable<WorklflowIsblProperty> GetProperties(XElement properties) =>
+      (properties?.Elements("Property") ?? Enumerable.Empty<XElement>())
+        .Where(p => (string)p.Attribute("ValueType") == "2")
+        .Select(p => new WorklflowIsblProperty { Name = RequiredName(p, "Name"),
+          Title = (string)p.Attribute("Description") ?? RequiredName(p, "Name"), CalculationText = GetTextPropertyValue(p) ?? string.Empty });
+
+    private static string RequiredName(XElement node, string attribute)
+    {
+      var value = (string)node.Attribute(attribute);
+      if (string.IsNullOrWhiteSpace(value)) throw new FormatException($"У узла {node.Name} отсутствует {attribute}.");
+      return value;
+    }
+
+    private static void ValidateUnique(IEnumerable<XElement> nodes, Func<XElement, string> key, string section)
+    {
+      var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      foreach (var node in nodes)
+        if (!names.Add(key(node))) throw new FormatException($"Повторное имя/код в разделе {section}: {key(node)}.");
     }
 
     private static string GetTextPropertyValue(XElement p)
@@ -279,7 +388,17 @@ namespace IsblCheck.Context.Development.Utils
     /// <param name="workflowDescriptionXml">XML описания маршрута.</param>
     private WorkflowDescriptionParser(string workflowDescriptionXml)
     {
-      this.description = XDocument.Parse(workflowDescriptionXml);
+      using var text = new StringReader(workflowDescriptionXml);
+      using var reader = XmlReader.Create(text, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
+      this.description = XDocument.Load(reader);
+      var root = this.description.Root;
+      if (root?.Name != "Settings") throw new FormatException("Ожидалась XML-схема Settings.");
+      ValidateUnique(root.Element("Event")?.Elements() ?? Enumerable.Empty<XElement>(), n => n.Name.LocalName, "Event");
+      ValidateUnique(root.Element("Blocks")?.Elements("Block") ?? Enumerable.Empty<XElement>(), n => RequiredName(n, "ID"), "Blocks");
+      foreach (var owner in root.DescendantsAndSelf().Where(n => n.Name == "Settings" || n.Name == "Block"))
+        ValidateUnique(owner.Elements().Where(n => n.Name == "Actions" || n.Name == "RouteActions").SelectMany(n => n.Elements("Action")), n => RequiredName(n, "Code"), "Actions");
+      foreach (var properties in root.Descendants("Properties"))
+        ValidateUnique(properties.Elements("Property"), n => RequiredName(n, "Name"), "Properties");
     }
 
     #endregion

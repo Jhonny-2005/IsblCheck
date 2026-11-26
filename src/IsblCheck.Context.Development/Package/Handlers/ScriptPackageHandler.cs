@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using IsblCheck.Context.Development.Package.Models;
 using IsblCheck.Core.Context.Development;
@@ -36,6 +36,8 @@ namespace IsblCheck.Context.Development.Package.Handlers
       foreach (var model in packageModel.Scripts)
       {
         var entity = PackageHandlerUtils.CreateEntity<Script>(model);
+        entity.ServerEventName = model.Card?.Requisites?.FirstOrDefault(r => r.Code == "ServerEventName" || r.Code == "ServerEvent" || r.Code == "СерверноеСобытие")?.Value;
+        entity.ModuleName = model.Card?.Requisites?.FirstOrDefault(r => r.Code == "ModuleName" || r.Code == "Module" || r.Code == "Модуль")?.Value;
 
         var stateReq = model.Card.Requisites
           .FirstOrDefault(r => r.Code == StateReqName);
